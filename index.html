@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>CREA TU DISEÑO</title>
+
+    <!-- Fuentes y estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Audiowide&family=Black+Han+Sans&family=Black+Ops+One&family=Codystar&family=Creepster&family=Ewert&family=Faster+One&family=Fjalla+One&family=Fredericka+the+Great&family=Fredoka+One&family=Galindo&family=Gugi&family=Italianno&family=Krona+One&family=Libre+Barcode+128+Text&family=Lobster&family=Monoton&family=Nosifer&family=Notable&family=Oi&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Questrial&family=Righteous&family=Rubik+Beastly&family=Rye&family=Sacramento&family=Staatliches&family=Tourney&family=Trade+Winds&family=Vast+Shadow&family=VT323&family=Zilla+Slab+Highlight&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* ========== ESTILOS GENERALES ========== */
+        @font-face {
+            font-family: 'Celtics';
+            src: url('fonts/NBACELTI.woff2') format('woff2'),
+                 url('fonts/NBACELTI.TTF') format('truetype');
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f0f2f5;color:#333}
+        .hidden{display:none!important}
+        .personalizador-app{display:flex;width:100%;max-width:1600px;height:850px;margin:auto;background:#fff}
+        .columna-visor{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;background:#f5f5f5}
+        .visor-prenda{position:relative;max-width:65%;user-select:none}
+        @media (max-width: 768px) {
+            .visor-prenda {
+                max-width: 95%;
+            }
+        }
+        #imagenSuperficie{max-width:100%;height:auto}
+        #areaDeEstampado{position:absolute;box-sizing:border-box;border:2px dashed #999}
+        .columna-opciones{
+            width:100%;
+            max-width:420px;
+            padding:20px 30px;
+            border-left:1px solid #e0e0e0;
+            display:flex;
+            flex-direction:column;
+            overflow-y:auto;
+            scrollbar-gutter:stable;
+            flex-shrink:0;
+            overflow-x:hidden
+        }
+        .columna-opciones>*{max-width:100%}
+        .panel-controles-principales{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+        .btn-control{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 5px;font-size:12px;font-weight:600;color:#fff;background:#e65100;border:2px solid #fff;border-radius:8px;cursor:pointer;transition:background .2s}
+        .btn-control:hover{background:#d84315}
+        .btn-control img{height:24px}
+        .contenedor-items-cargados{border:1px solid #ccc;background:#f0f2f5;padding:10px;border-radius:6px;min-height:50px}
+        .contenedor-items-cargados .placeholder{color:#888;font-style:italic;text-align:center;padding:15px 0}
+        .item-cargado{display:flex;align-items:flex-start;background:#fff;padding:10px;border-radius:4px;position:relative;margin-bottom:10px;flex-wrap:wrap}
+        .item-cargado.seleccionado-en-lista{box-shadow:0 0 0 2px #e65100}
+        .preview-img-container{width:50px;margin-right:15px;flex-shrink:0}
+        .preview-img{width:50px;height:50px;object-fit:contain;border:1px solid #eee}
+        .preview-texto{font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-grow:1}
+        .btn-eliminar-item{position:absolute;top:5px;right:5px;width:20px;height:20px;background:#d32f2f;color:#fff;border:none;border-radius:50%;cursor:pointer;font-weight:700;z-index:2}
+        .detalle-estampado{flex-grow:1}
+        .detalle-linea{font-size:12px;color:#555;margin-bottom:2px;text-align:left}
+        .detalle-linea strong{color:#222}
+        .btn-eliminar-detalle{padding:4px 8px;font-size:12px;background:#e0e0e0;border:1px solid #ccc;border-radius:4px;cursor:pointer;margin-top:8px}
+        .panel-editor-texto-externo{border:1px solid #ccc;background:#f9f9f9;padding:15px;border-radius:6px;margin-top:15px}
+        .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .editor-fila{grid-column:1/-1}
+        .editor-fila label,.editor-item label{display:block;font-size:12px;font-weight:600;margin-bottom:5px;color:#555}
+        .editor-fila textarea{width:100%;border:1px solid #ccc;border-radius:4px;padding:8px;resize:vertical;min-height:60px}
+        .editor-fila select,.editor-item input,.editor-item select{width:100%;padding:8px;border:1px solid #ccc;border-radius:4px}
+        .grupo-botones{display:flex;gap:5px}
+        .btn-editor{flex:1;padding:8px;font-weight:700;font-family:sans-serif;cursor:pointer;background:#e0e0e0;border:1px solid #ccc;border-radius:4px}
+        .btn-editor.cursiva{font-style:italic}
+        .btn-editor.subrayado{text-decoration:underline}
+        .btn-editor.active{background:#00aeff;color:#fff;border-color:#007acc}
+        #panelEditorTexto select{width:100%;text-overflow:ellipsis}
+        .panel-seccion{margin-bottom:20px}
+        .panel-seccion h2{font-size:14px;font-weight:600;text-transform:uppercase;color:#555;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:15px}
+        .panel-posicion-estampado{display:flex;gap:10px;margin-bottom:20px}
+        .btn-vista{flex-grow:1;padding:12px;font-size:14px;font-weight:600;border:2px solid #ccc;background:#f0f0f0;border-radius:8px;cursor:pointer}
+        .btn-vista.active{background:#e65100;color:#fff;border-color:#e65100}
+        .panel-selector-productos{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(70px,1fr));
+            gap:10px;
+            background:#212121;
+            padding:15px;
+            border-radius:8px
+        }
+        .itemSuperficiesIcono{display:flex;flex-direction:column;align-items:center;gap:5px;padding:5px;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:.2s}
+        .itemSuperficiesIcono img{height:40px;max-width:100%}
+        .itemSuperficiesIcono span{font-size:10px;color:#fff;text-align:center;word-break:break-word}
+        .itemSuperficiesIcono.selected{border-color:#e65100;background:#424242}
+        .listaColores{display:flex;gap:12px;flex-wrap:wrap;list-style:none}
+        .itemColores{width:28px;height:28px;border-radius:50%;border:2px solid #ccc;cursor:pointer}
+        .itemColores.selected{border-color:#e65100;transform:scale(1.15)}
+        .itemColores.disabled{opacity:.3;cursor:not-allowed}
+        .lista-tallas{display:flex;gap:10px;flex-wrap:wrap}
+        .itemTalla{padding:8px 12px;border:2px solid #ccc;border-radius:6px;cursor:pointer;font-weight:600;background:#fff;transition:all .2s}
+        .itemTalla.selected{border-color:#e65100;background:#e65100;color:#fff}
+        /* Botón guía de tallas (pequeño) */
+        .btn-guia-tallas {
+            padding:4px 8px;
+            font-size:11px;
+            background:#e65100;
+            color:#fff;
+            border:none;
+            border-radius:4px;
+            cursor:pointer;
+            white-space:nowrap;
+        }
+        .seccion-compra-final{margin-top:auto;padding-top:20px;border-top:1px solid #eee}
+        .panel-seccion-final{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+        .precio-container label,.cantidad-container label{font-size:14px;font-weight:600;color:#555}
+        .precio-valor{font-size:24px;font-weight:700;color:#2E7D32}
+        .precio-desglose{font-size:12px;color:#666;margin-top:8px;padding:6px;background:#f9f9f9;border-radius:4px;border:1px solid #eee;max-height:200px;overflow-y:auto}
+        .precio-desglose div{margin-bottom:2px}
+        .cantidad-control{display:flex}
+        .cantidad-control button{width:30px;height:30px;border:1px solid #ccc;background:#f0f0f0;font-size:18px;cursor:pointer}
+        .cantidad-control input{width:40px;text-align:center;border:1px solid #ccc;border-left:none;border-right:none;font-size:16px}
+        .acciones-extras{display:flex;gap:10px;margin-top:10px}
+        .btn-whatsapp,.btn-pdf{flex:1;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:6px;cursor:pointer;transition:background .2s}
+        .btn-whatsapp{background:#25D366;color:#fff}
+        .btn-whatsapp:hover{background:#128C7E}
+        .btn-pdf{background:#d32f2f;color:#fff}
+        .btn-pdf:hover{background:#B71C1C}
+        #btnAgregarAlCarrito{width:100%;padding:15px;font-size:18px;font-weight:700;color:#fff;background:#d32f2f;border:none;border-radius:8px;cursor:pointer}
+        #btnAgregarAlCarrito:hover{background:#B71C1C}
+        .elemento-personalizado{
+            position:absolute;
+            padding:5px;
+            touch-action: none; /* Evita el zoom en móvil mientras se arrastra */
+        }
+        .elemento-personalizado img{width:100%;height:100%;user-select:none}
+        .elemento-personalizado.seleccionado{border:1px dashed #888}
+        .texto-personalizado{white-space:pre-wrap;word-wrap:break-word;max-width:90%;height:auto;width:auto;cursor:grab}
+        .elemento-personalizado .ui-resizable-handle{display:none}
+        .elemento-personalizado.seleccionado .ui-resizable-se{
+            display:block;width:16px;height:16px;background-color:#f9f9f9;
+            background-image:url("imagenes/iconos/redimensionar.png");
+            background-position:center;background-repeat:no-repeat;background-size:10px;
+            border:1px solid #ccc;border-radius:2px;bottom:-8px;right:-8px;
+            cursor:nwse-resize;z-index:100
+        }
+        .modal-overlay{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:rgba(0,0,0,.6);z-index:1000}
+        .modal-contenido{background:#fff;padding:20px;border-radius:8px;width:90%;max-width:900px;max-height:90vh;overflow-y:auto;text-align:center}
+        .grilla-items-modal{display:flex;flex-wrap:wrap;gap:15px;justify-content:center;margin-top:20px}
+        .icono-item,.catalogo-item{padding:5px;border:1px solid #ddd;background:#f5f5f5;cursor:pointer;transition:.2s}
+        .icono-item{width:50px;height:50px;object-fit:contain}
+        .catalogo-item{width:120px;height:120px;object-fit:contain}
+        .icono-item:hover,.catalogo-item:hover{transform:scale(1.05);box-shadow:0 0 8px rgba(0,0,0,.2)}
+        .btn-cerrar-modal,.btn-volver-categorias{margin-top:20px;padding:10px 20px;background:#d32f2f;color:#fff;border:none;border-radius:6px;cursor:pointer}
+        #vista-categorias-iconos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px}
+        .categoria-caja{border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center}
+        .categoria-caja h3{font-size:14px;margin-bottom:10px}
+        .categoria-preview{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}
+        .categoria-preview img{width:100%;height:50px;object-fit:contain;background:#f0f0f0;border:1px solid #eee;border-radius:4px}
+        .btn-ver-categoria{width:100%;padding:8px;font-size:12px;font-weight:700;color:#fff;background:#e65100;border:none;border-radius:6px;cursor:pointer}
+        #vista-iconos-individuales h3{font-size:16px;margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px}
+
+        /* Tabla de tallas en modal */
+        .tabla-tallas {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .tabla-tallas th,
+        .tabla-tallas td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .tabla-tallas th {
+            background-color: #f2f2f2;
+        }
+
+        /* ========== MENSAJE REFERENCIAL ========== */
+        .nota-legal {
+            margin-top: 15px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-left: 3px solid #e65100;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            max-width: 100%;
+        }
+        .nota-icono {
+            font-size: 18px;
+            color: #e65100;
+            font-weight: bold;
+        }
+        .nota-texto {
+            line-height: 1.4;
+        }
+
+        /* ========== MEDIA QUERIES MEJORADAS ========== */
+        @media (max-width:992px){
+            .personalizador-app{flex-direction:column;height:auto}
+            .columna-opciones{max-width:100%;padding:15px;border-left:none;border-top:2px solid #e0e0e0;overflow-y:visible;scrollbar-gutter:auto}
+            .panel-selector-productos{grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:5px;padding:10px}
+            .itemSuperficiesIcono img{height:35px}
+            .itemSuperficiesIcono span{font-size:8px;white-space:normal;line-height:1.2}
+            .listaColores{gap:6px}
+            .itemColores{width:22px;height:22px}
+            .panel-seccion-final{flex-direction:column;align-items:flex-start;gap:10px}
+            .cantidad-container,.precio-container{width:100%}
+            .cantidad-control{justify-content:space-between}
+        }
+        @media (max-width:480px){
+            .columna-opciones{padding:10px}
+            .panel-controles-principales{grid-template-columns:repeat(2,1fr)}
+            .btn-control{flex-direction:row;justify-content:flex-start;gap:8px;padding:8px}
+            .btn-control img{height:24px}
+            .panel-selector-productos{grid-template-columns:repeat(3,1fr)}
+            .itemSuperficiesIcono span{font-size:7px;white-space:normal;word-break:break-word}
+        }
+
+        /* ====== REDUCCIÓN EXTREMA DEL MENÚ DERECHO ====== */
+        .columna-opciones{font-size:12px!important;padding:10px 12px!important;overflow-x:hidden!important;max-height:100vh;overflow-y:auto}
+        .panel-seccion h2{font-size:12px!important;padding-bottom:5px!important;margin-bottom:8px!important}
+        .panel-controles-principales{gap:4px!important;margin-bottom:10px!important}
+        .btn-control{padding:5px 2px!important;font-size:9px!important}
+        .btn-control img{height:18px!important}
+        .panel-posicion-estampado{gap:5px!important;margin-bottom:10px!important}
+        .btn-vista{padding:6px!important;font-size:11px!important}
+        .contenedor-items-cargados{padding:8px!important;min-height:40px!important}
+        .item-cargado{padding:6px!important;margin-bottom:5px!important}
+        .detalle-linea{font-size:10px!important}
+        .btn-eliminar-detalle{padding:2px 6px!important;font-size:10px!important;margin-top:4px!important}
+        .panel-selector-productos{grid-template-columns:repeat(auto-fill,minmax(45px,1fr))!important;gap:4px!important;padding:6px!important}
+        .itemSuperficiesIcono{padding:2px!important;gap:2px!important}
+        .itemSuperficiesIcono img{height:25px!important;max-width:100%!important}
+        .itemSuperficiesIcono span{font-size:7px!important;line-height:1.1!important;white-space:normal!important;word-break:break-word!important;max-width:100%!important}
+        .listaColores{gap:4px!important}
+        .itemColores{width:18px!important;height:18px!important;border-width:1px!important}
+        .lista-tallas{gap:4px!important}
+        .itemTalla{padding:4px 6px!important;font-size:11px!important}
+        .panel-seccion-final{gap:5px!important;margin-bottom:10px!important}
+        .cantidad-container label,.precio-container label{font-size:11px!important}
+        .cantidad-control button,.cantidad-control input{width:24px!important;height:24px!important;font-size:12px!important}
+        .precio-valor{font-size:16px!important}
+        .precio-desglose{font-size:10px!important}
+        #btnAgregarAlCarrito,.btn-whatsapp,.btn-pdf{font-size:14px!important;padding:8px!important}
+        @media (max-width:992px){
+            .columna-opciones{padding:8px 10px!important}
+            .panel-selector-productos{grid-template-columns:repeat(auto-fill,minmax(40px,1fr))!important}
+            .itemSuperficiesIcono img{height:22px!important}
+        }
+        @media (max-width:480px){
+            .columna-opciones{padding:6px!important}
+            .panel-controles-principales{grid-template-columns:repeat(2,1fr)!important}
+            .btn-control{flex-direction:row!important;justify-content:flex-start!important;gap:4px!important;padding:4px!important}
+            .panel-selector-productos{grid-template-columns:repeat(3,1fr)!important}
+            .itemSuperficiesIcono span{font-size:6px!important}
+            .itemColores{width:16px!important;height:16px!important}
+        }
+    </style>
+</head>
+<body>
+
+    <input type="file" id="subirImagenInput" accept="image/png, image/jpeg, image/webp" class="hidden">
+
+    <div class="personalizador-app">
+
+        <div class="columna-visor">
+            <div class="visor-prenda" id="capture">
+                <img id="imagenSuperficie" src="imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-blanco.png" alt="Prenda seleccionada">
+                <div id="areaDeEstampado">
+                    <div id="diseñosFrente"></div>
+                    <div id="diseñosEspalda" class="hidden"></div>
+                </div>
+            </div>
+            <!-- MENSAJE REFERENCIAL -->
+            <div class="nota-legal">
+                <span class="nota-icono">ⓘ</span>
+                <span class="nota-texto">La imagen de la prenda es referencial. El diseño se ajustará al producto seleccionado.</span>
+            </div>
+        </div>
+
+        <div class="columna-opciones">
+            
+            <div class="panel-controles-principales">
+                <button class="btn-control" id="btnSubirImagen"><img src="imagenes/iconos/subir.png"><span>Imagen</span></button>
+                <button class="btn-control" id="btnAgregarTexto"><img src="imagenes/iconos/texto.png"><span>Texto</span></button>
+                <button class="btn-control" id="btnIconos"><img src="imagenes/iconos/iconos.png"><span>Iconos</span></button>
+                <button class="btn-control" id="btnCatalogo"><img src="imagenes/iconos/catalogo.png"><span>Catálogo</span></button>
+            </div>
+
+            <div class="panel-seccion">
+                <h2>Posición del estampado</h2>
+                <div class="panel-posicion-estampado">
+                    <button id="btnVistaFrente" class="btn-vista active" data-vista="frente">Frente</button>
+                    <button id="btnVistaEspalda" class="btn-vista" data-vista="espalda">Espalda</button>
+                </div>
+            </div>
+
+            <div class="panel-seccion panel-editor-estampados">
+                <h2 id="tituloListaDiseños">Mis Diseños Actuales - Frente</h2>
+                <div id="listaElementosCargados" class="contenedor-items-cargados">
+                    <div id="listaFrente"></div>
+                    <div id="listaEspalda" class="hidden"></div>
+                </div>
+                <div id="panelEditorTexto"></div>
+            </div>
+
+            <div class="panel-seccion">
+                <h2>Diseño Personalizado</h2>
+                <div class="panel-selector-productos">
+                    <div class="itemSuperficiesIcono selected" data-idsuperficie="1" title="Polera Cuello Redondo"><img src="imagenes/iconos/poleraiconblanco.png"><span>Polera Cuello Redondo</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="31" title="Polera Cuello Pique"><img src="imagenes/iconos/poleraPique.png"><span>Polera Cuello Pique</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="34" title="Polera Acid"><img src="imagenes/iconos/poleraacid.png"><span>Polera Acid</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="37" title="Polera Oversize"><img src="imagenes/iconos/poleraoversizeicon.png"><span>Polera Oversize</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="4" title="Polera Mujer"><img src="imagenes/iconos/poleramujericonblanco.png"><span>Polera Mujer</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="11" title="Polera Niño"><img src="imagenes/iconos/poleraninoiconblanco.png"><span>Polera Niño</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="17" title="Sudadera"><img src="imagenes/iconos/sinmanga.png"><span>Sudadera</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="18" title="Manga Larga"><img src="imagenes/iconos/mangalarga.png"><span>Manga Larga</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="30" title="Polera Raglan"><img src="imagenes/iconos/poleraraglaniconblanco.png"><span>Polera Raglan</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="9" title="Polerón Canguro"><img src="imagenes/iconos/poleroniconblanco.png"><span>Polerón Canguro</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="35" title="Polerón Cierre"><img src="imagenes/iconos/poleroncierreiconblanco.png"><span>Polerón Cierre</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="28" title="Polerón Canguro Niño"><img src="imagenes/iconos/poleronninoiconblanco.png"><span>Polerón Canguro Niño</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="27" title="Polerón Polo"><img src="imagenes/iconos/poleronpoloiconblanco.png"><span>Polerón Polo</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="29" title="Gorro"><img src="imagenes/iconos/gorroicon.png"><span>Gorro</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="32" title="Shoperos"><img src="imagenes/iconos/tazadecafe.png"><span>Shoperos</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="33" title="Mochilas"><img src="imagenes/iconos/mochilaicon.png"><span>Mochilas</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="36" title="Tote Bag"><img src="imagenes/iconos/totebag.png"><span>Tote Bag</span></div>
+                    <div class="itemSuperficiesIcono" data-idsuperficie="38" title="Polera Deportiva"><img src="imagenes/iconos/poleraiconblanco.png"><span>Polera Deportiva</span></div>
+                </div>
+            </div>
+
+            <!-- PANEL DE TALLAS: botón al lado del título sin espacio extra -->
+            <div class="panel-seccion panel-tallas" style="display: none;">
+                <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 10px !important;">
+                    <h2 style="margin:0 !important; border-bottom:none !important; padding-bottom:0 !important; font-size:14px;">Talla</h2>
+                    <button class="btn-guia-tallas" style="padding:4px 8px; font-size:11px; white-space:nowrap;">📏 Guía de tallas</button>
+                </div>
+                <div class="lista-tallas"></div>
+            </div>
+
+            <div class="panel-seccion">
+                <h2>Fondo / Colores</h2>
+                <ul class="listaColores">
+                    <li class="itemColores" data-color="blanco" style="background:#FFFFFF" title="Blanco"></li>
+                    <li class="itemColores" data-color="negro" style="background:#212121" title="Negro"></li>
+                    <li class="itemColores" data-color="gris" style="background:#BDBDBD" title="Gris"></li>
+                    <li class="itemColores" data-color="rojo" style="background:#B71C1C" title="Rojo"></li>
+                    <li class="itemColores" data-color="azul" style="background:#1A237E" title="Azul"></li>
+                    <li class="itemColores" data-color="morado" style="background:#9a0de0" title="Morado"></li>
+                    <li class="itemColores" data-color="verde" style="background:#1B5E20" title="Verde"></li>
+                    <li class="itemColores" data-color="verde-limon" style="background:#ADFF2F" title="Verde Limón"></li>
+                    <li class="itemColores" data-color="naranja" style="background:#E65100" title="Naranja"></li>
+                    <li class="itemColores" data-color="amarillo" style="background:#FDD835" title="Amarillo"></li>
+                    <li class="itemColores" data-color="rosado" style="background:#f593b4" title="Rosado"></li>
+                    <li class="itemColores" data-color="burdeo" style="background:#7b072e" title="Burdeo"></li>
+                    <li class="itemColores" data-color="beige" style="background:#F5F5DC" title="Beige"></li>
+                </ul>
+            </div>
+
+            <div class="seccion-compra-final">
+                <div class="panel-seccion-final">
+                    <div class="cantidad-container">
+                        <label>Cantidad:</label>
+                        <div class="cantidad-control">
+                            <button id="btnMenos">-</button>
+                            <input id="txtCantidad" value="1" readonly>
+                            <button id="btnMas">+</button>
+                        </div>
+                    </div>
+                    <div class="precio-container">
+                        <label>Precio:</label>
+                        <span class="precio-valor">$0</span>
+                        <div class="precio-desglose" id="precioDesglose">
+                            <div>Precio base: <strong>$0</strong></div>
+                            <div>Cargo por diseños: <strong>$0</strong></div>
+                            <div>Subtotal: <strong>$0</strong></div>
+                            <div>Cantidad: <strong>1</strong></div>
+                            <div style="margin-top:4px; border-top:1px dashed #ccc; padding-top:4px;">Total: <strong>$0</strong></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="acciones-extras">
+                    <button class="btn-whatsapp" id="btnWhatsApp">📱 WhatsApp</button>
+                    <button class="btn-pdf" id="btnAgregarAlCarrito">🛒 Agregar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="modal-iconos-overlay" class="modal-overlay hidden">
+        <div class="modal-contenido">
+            <h2>Figuras Disponibles</h2>
+            <div id="vista-categorias-iconos"></div>
+            <div id="vista-iconos-individuales" class="hidden"></div>
+            <button class="btn-cerrar-modal">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-catalogo-overlay" class="modal-overlay hidden">
+        <div class="modal-contenido">
+            <h2>Catálogo de Diseños</h2>
+            <div id="grilla-catalogo-imagenes" class="grilla-items-modal"></div>
+            <button class="btn-cerrar-modal">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Modal Guía de Tallas -->
+    <div id="modal-tallas-overlay" class="modal-overlay hidden">
+        <div class="modal-contenido" style="max-width: 500px;">
+            <h2>Guía de tallas - <span id="modal-tallas-producto"></span></h2>
+            <div id="tabla-tallas-contenido"></div>
+            <button class="btn-cerrar-modal">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-rotatable@1.0.1/jquery.ui.rotatable.min.js"></script>
+
+    <script>
+    // ============================================
+    // CONSTANTES GLOBALES
+    // ============================================
+    const MAX_CM = 30;
+
+    // ============================================
+    // 1. BASE DE DATOS CON PRECIOS POR TALLA Y FACTOR CM²
+    // ============================================
+    const productos = {
+        "1":{
+            nombre:"Polera Cuello Redondo",
+            precioPorTalla: { 
+                S: 6000, M: 6000, L: 6000, XL: 6000, XXL: 6000, 
+                "3XL": 9000, "4XL": 9000,
+                default: 6000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                XXL: 12.62,
+                "3XL": 12.04,
+                "4XL": 13.42,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "XXL", "3XL", "4XL"],
+            anchoRealCm: { 
+                S: 48, M: 50, L: 54, XL: 58, XXL: 62, "3XL": 66, "4XL": 70,
+                default: 54 
+            },
+            altoRealCm: { 
+                S: 69, M: 71, L: 73, XL: 75, XXL: 77, "3XL": 79, "4XL": 81,
+                default: 73 
+            },
+            // Área de estampado REDUCIDA (ancho ~46%, alto ~60%)
+            areaEstampadoFrente: { top: '16%', left: '27%', width: '46%', height: '60%' },
+            areaEstampadoEspalda: { top: '11%', left: '27%', width: '46%', height: '55%' },
+            colores:{
+                negro:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-negro.png",
+                "negro-espalda":"imagenes/polera-cuello-redondo/poleraNegraEspalda2025_800x859.png",
+                blanco:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-blanco.png",
+                "blanco-espalda":"imagenes/polera-cuello-redondo/poleraBlancaEspalda2025_800x859.png",
+                gris:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-gris.png",
+                "gris-espalda":"imagenes/polera-cuello-redondo/poleraGrisEspalda2025_800x859.png",
+                rojo:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-rojo.png",
+                "rojo-espalda":"imagenes/polera-cuello-redondo/poleraRojaEspalda2025_800x859.png",
+                amarillo:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-amarillo.png",
+                "amarillo-espalda":"imagenes/polera-cuello-redondo/poleraAmarillaEspalda2025_800x859.png",
+                verde:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-verde.png",
+                "verde-espalda":"imagenes/polera-cuello-redondo/poleraVerdeJadeEspalda2025_800x859.png",
+                burdeo:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-burdeo.png",
+                "burdeo-espalda":"imagenes/polera-cuello-redondo/poleraBurdeoEspalda2025_800x859.png",
+                azul:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-azul.png",
+                "azul-espalda":"imagenes/polera-cuello-redondo/poleraAzulEspalda20205_800x859.png",
+                naranja:"imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-naranja.png",
+                "naranja-espalda":"imagenes/polera-cuello-redondo/poleraNaranjaEspalda2025_800x859.png"
+            }
+        },
+        "31":{
+            nombre:"Polera Cuello Pique",
+            precioPorTalla: { 
+                S: 6000, M: 6000, L: 6000, XL: 6000, "2XL": 6000, 
+                default: 6000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { S: 49, M: 52, L: 55, XL: 58, "2XL": 62, default: 55 },
+            altoRealCm: { S: 69, M: 71, L: 73, XL: 75, "2XL": 77, default: 73 },
+            areaEstampadoFrente: { top: '16%', left: '27%', width: '46%', height: '60%' },
+            areaEstampadoEspalda: { top: '13%', left: '27%', width: '46%', height: '60%' },
+            colores:{
+                blanco:"imagenes/polera-cuello-pique/poleraBlancaPique.png",
+                "blanco-espalda":"imagenes/polera-cuello-pique/poleraBlancaPiqueEspalda.png"
+            }
+        },
+        "34":{
+            nombre:"Polera Acid",
+            precioPorTalla: { 
+                S: 6000, M: 6000, L: 6000, XL: 6000, "2XL": 6000, 
+                default: 6000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { S: 48, M: 50, L: 54, XL: 58, "2XL": 62, default: 54 },
+            altoRealCm: { S: 69, M: 71, L: 73, XL: 75, "2XL": 77, default: 73 },
+            areaEstampadoFrente: { top: '14%', left: '27%', width: '46%', height: '60%' },
+            areaEstampadoEspalda: { top: '20%', left: '27%', width: '46%', height: '60%' },
+            colores:{
+                gris:"imagenes/polera-acid/acidGris_800x802.png", 
+                "gris-espalda":"imagenes/polera-acid/acidGrisEspalda_800x802.png", 
+                azul:"imagenes/polera-acid/acidMarino_800x802.png", 
+                negro:"imagenes/polera-acid/acidNegro_800x802.png"
+            }
+        },
+        "37":{
+            nombre:"Polera Oversize",
+            precioPorTalla: { default: 6000 },
+            factorCm2: { default: 7.11 },
+            tallas: ["Talla Única"],
+            anchoRealCm: { default: 60 },
+            altoRealCm: { default: 75 },
+            areaEstampadoFrente: { top: '15%', left: '27%', width: '46%', height: '60%' },
+            areaEstampadoEspalda: { top: '20%', left: '27%', width: '46%', height: '60%' },
+            colores:{
+                negro:"imagenes/polera-oversize/poleraOversizeNegro_800x859.png",
+                "negro-espalda":"imagenes/polera-oversize/poleraOversizeNegroEspalda_800x859.png",
+                beige:"imagenes/polera-oversize/poleraOversizeBeige_800x859.png",
+                "beige-espalda":"imagenes/polera-oversize/poleraOversizeBeigeEspalda_800x859.png",
+            }
+        },
+        "4":{
+            nombre:"Polera Mujer",
+            precioPorTalla: { 
+                S: 6000, M: 6000, L: 6000, XL: 6000, "2XL": 6000, "3XL": 6000, 
+                default: 6000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                "3XL": 12.04,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL", "3XL"],
+            anchoRealCm: { S: 41, M: 44, L: 47, XL: 50, "2XL": 54, "3XL": 57, default: 44 },
+            altoRealCm: { S: 62, M: 64, L: 66, XL: 68, "2XL": 69, "3XL": 70, default: 64 },
+            areaEstampadoFrente: { top: '20%', left: '27%', width: '46%', height: '60%' },
+            areaEstampadoEspalda: { top: '20%', left: '27%', width: '46%', height: '60%' },
+            colores:{
+                blanco:"imagenes/polera-mujer/mujerBlanco2025_800x943.png", 
+                "blanco-espalda":"imagenes/polera-mujer/mujerBlancoEspalda2025_800x943.png",
+                negro:"imagenes/polera-mujer/mujerNegra2025_800x943.png", 
+                "negro-espalda":"imagenes/polera-mujer/mujerNegraEspalda2025_800x943.png",
+                azul:"imagenes/polera-mujer/mujerAzulMarino2025_800x943.png", 
+                "azul-espalda":"imagenes/polera-mujer/mujerAzulEspalda2025_800x943.png",
+                burdeo:"imagenes/polera-mujer/mujerBurdeo2025_800x943.png", 
+                "burdeo-espalda":"imagenes/polera-mujer/mujerBurdeoEspalda2025_800x943.png",
+                rojo:"imagenes/polera-mujer/mujerRojo2025_800x943.png", 
+                "rojo-espalda":"imagenes/polera-mujer/mujerRojoEspalda2025_800x943.png",
+                gris:"imagenes/polera-mujer/mujerGris2025_800x943.png", 
+                "gris-espalda":"imagenes/polera-mujer/mujerGrisEspalda2025_800x943.png"
+            }
+        },
+        "11":{
+            nombre:"Polera de niño",
+            precioPorTalla: { 
+                "3/4": 5000, "5/6": 5000, "7/8": 5000, "9/10": 5000, "11/12": 5000, 
+                default: 5000 
+            },
+            factorCm2: {
+                "3/4": 7.11,
+                "5/6": 8.49,
+                "7/8": 9.87,
+                "9/10": 11.24,
+                "11/12": 12.62,
+                default: 7.11
+            },
+            tallas: ["3/4", "5/6", "7/8", "9/10", "11/12"],
+            anchoRealCm: { "3/4": 33, "5/6": 36, "7/8": 39, "9/10": 43, "11/12": 47, default: 36 },
+            altoRealCm: { "3/4": 43, "5/6": 47, "7/8": 51, "9/10": 55, "11/12": 59, default: 47 },
+            areaEstampadoFrente: { top: '18%', left: '25%', width: '50%', height: '60%' },
+            areaEstampadoEspalda: { top: '20%', left: '25%', width: '50%', height: '60%' },
+            colores:{
+                blanco:"imagenes/polera-de-nino/poleraNinoBlancoV2_800x888.png", 
+                "blanco-espalda":"imagenes/polera-de-nino/poleraNinoBlancoEspaldaV2_800x888.png",
+                negro:"imagenes/polera-de-nino/poleraNinoNegroV2_800x888.png", 
+                "negro-espalda":"imagenes/polera-de-nino/poleraNinoNegroEspaldaV2_800x888.png",
+                azul:"imagenes/polera-de-nino/poleraNinoAzulV2_800x888.png", 
+                "azul-espalda":"imagenes/polera-de-nino/poleraNinoAzulEspaldaV2_800x888.png",
+                rojo:"imagenes/polera-de-nino/poleraNinoRojoV2_800x888.png", 
+                "rojo-espalda":"imagenes/polera-de-nino/poleraNinoRojoEspaldaV2_800x888.png"
+            }
+        },
+        "17":{
+            nombre:"Sudadera",
+            precioPorTalla: { 
+                S: 10000, M: 10000, L: 10000, XL: 10000, "2XL": 10000, 
+                default: 10000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { S: 47, M: 49, L: 51, XL: 53, "2XL": 55, default: 51 },
+            altoRealCm: { S: 69, M: 71, L: 73, XL: 75, "2XL": 77, default: 73 },
+            areaEstampadoFrente: { top: '30%', left: '25%', width: '50%', height: '50%' },
+            areaEstampadoEspalda: { top: '25%', left: '25%', width: '50%', height: '50%' },
+            colores:{
+                blanco:"imagenes/sudadera/sudaderaBlancaMangasNegras.png", 
+                "blanco-espalda":"imagenes/sudadera/sudaderaBlancaEspaldaV3_800x1000.png",
+                negro:"imagenes/sudadera/sudaderaNegra.png", 
+                "negro-espalda":"imagenes/sudadera/sudaderaNegraEspalda_800x1000.png",
+                rojo:"imagenes/sudadera/sudaderaRoja.png", 
+                "rojo-espalda":"imagenes/sudadera/sudaderaRojaEspalda_800x1000.png"
+            }
+        },
+        "18":{
+            nombre:"Manga larga",
+            precioPorTalla: { 
+                S: 10000, M: 10000, L: 10000, XL: 10000, "2XL": 10000, 
+                default: 10000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { S: 47, M: 49, L: 53, XL: 57, "2XL": 61, default: 49 },
+            altoRealCm: { S: 70, M: 72, L: 74, XL: 76, "2XL": 78, default: 72 },
+            areaEstampadoFrente: { top: '15%', left: '25%', width: '50%', height: '55%' },
+            areaEstampadoEspalda: { top: '20%', left: '25%', width: '50%', height: '55%' },
+            colores:{
+                blanco:"imagenes/polera-manga-larga/blancoMangaLarga_800x945.png", 
+                "blanco-espalda":"imagenes/polera-manga-larga/blancoMangaLargaEspalda_800x945.png",
+                negro:"imagenes/polera-manga-larga/negraMangaLarga_800x945.png", 
+                "negro-espalda":"imagenes/polera-manga-larga/negraMangaLargaEspalda_800x945.png"
+            }
+        },
+        "30":{
+            nombre:"Polera Raglan",
+            precioPorTalla: { 
+                S: 6000, M: 6000, L: 6000, XL: 6000, XXL: 6000, 
+                default: 6000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                XXL: 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "XXL"],
+            anchoRealCm: { S: 48, M: 50, L: 54, XL: 58, XXL: 62, default: 54 },
+            altoRealCm: { S: 69, M: 71, L: 73, XL: 75, XXL: 77, default: 73 },
+            areaEstampadoFrente: { top: '12%', left: '27%', width: '46%', height: '60%' },
+            areaEstampadoEspalda: { top: '20%', left: '27%', width: '46%', height: '60%' },
+            colores:{
+                blanco:"imagenes/polera-raglan/polera-raglan-blanco.png", 
+                "blanco-espalda":"imagenes/polera-raglan/raglanBlancoNegroEspalda_800x800.png",
+                negro:"imagenes/polera-raglan/polera-raglan-negro.png", 
+                "negro-espalda":"imagenes/polera-raglan/raglanNegroNegroHeatherEspalda_800x800.png",
+            }
+        },
+        "9":{
+            nombre:"Polerón Canguro",
+            precioPorTalla: { 
+                XS: 10000, S: 10000, M: 10000, L: 10000, XL: 10000, "2XL": 10000, 
+                default: 10000 
+            },
+            factorCm2: {
+                XS: 7.11,
+                S: 8.49,
+                M: 9.87,
+                L: 11.24,
+                XL: 12.62,
+                "2XL": 13.42,
+                default: 7.11
+            },
+            tallas: ["XS", "S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { XS: 51, S: 54, M: 57, L: 60, XL: 63, "2XL": 66, default: 57 },
+            altoRealCm: { XS: 64, S: 66, M: 68, L: 70, XL: 72, "2XL": 74, default: 68 },
+            areaEstampadoFrente: { top: '15%', left: '30%', width: '40%', height: '40%' },
+            areaEstampadoEspalda: { top: '20%', left: '25%', width: '50%', height: '50%' },
+            colores:{
+                blanco:"imagenes/poleron-canguro/poleron-canguro-blanco.png", 
+                "blanco-espalda":"imagenes/poleron-canguro/poleronBlancoEspalda2024_800x800.png",
+                negro:"imagenes/poleron-canguro/poleron-canguro-negro.png", 
+                "negro-espalda":"imagenes/poleron-canguro/poleronNegroEspalda2024_800x800.png",
+                amarillo:"imagenes/poleron-canguro/poleron-canguro-amarillo.png", 
+                "amarillo-espalda":"imagenes/poleron-canguro/poleronAmarilloEspalda2024_800x800.png",
+                rojo:"imagenes/poleron-canguro/poleron-canguro-rojo.png", 
+                "rojo-espalda":"imagenes/poleron-canguro/poleronRojoEspalda2024_800x800.png",
+                azul:"imagenes/poleron-canguro/poleron-canguro-azul.png", 
+                "azul-espalda":"imagenes/poleron-canguro/poleronAzulEspalda2024_800x800.png",
+                burdeo:"imagenes/poleron-canguro/poleron-canguro-burdeo.png", 
+                "burdeo-espalda":"imagenes/poleron-canguro/poleronBurdeoEspalda2024_800x800.png",
+                morado:"imagenes/poleron-canguro/poleron-canguro-morado.png", 
+                "morado-espalda":"imagenes/poleron-canguro/poleronMoradoEspalda2024_800x800.png",
+                gris:"imagenes/poleron-canguro/poleron-canguro-gris.png", 
+                "gris-espalda":"imagenes/poleron-canguro/poleronGrisEspalda2024_800x800.png",
+                rosado:"imagenes/poleron-canguro/poleron-canguro-rosado.png", 
+                "rosado-espalda":"imagenes/poleron-canguro/poleronRosadoEspalda2024_800x800.png",
+                verde:"imagenes/poleron-canguro/poleron-canguro-verde.png", 
+                "verde-espalda":"imagenes/poleron-canguro/poleronVerdeEspalda2024_800x800.png"
+            }
+        },
+        "35":{
+            nombre:"Polerón c/cierre",
+            precioPorTalla: { 
+                S: 10000, M: 10000, L: 10000, XL: 10000, "2XL": 10000, 
+                default: 10000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { S: 54, M: 57, L: 60, XL: 63, "2XL": 66, default: 60 },
+            altoRealCm: { S: 64, M: 67, L: 70, XL: 73, "2XL": 76, default: 70 },
+            areaEstampadoFrente: { top: '15%', left: '30%', width: '40%', height: '40%' },
+            areaEstampadoEspalda: { top: '20%', left: '25%', width: '50%', height: '50%' },
+            colores:{
+                negro:"imagenes/poleron-cierre/poleron-cierre-Negro.png", 
+                "negro-espalda":"imagenes/poleron-cierre/poleronNegroEspalda2024_800x800.png",
+                blanco:"imagenes/poleron-cierre/poleron-cierre-Gris.png", 
+                "blanco-espalda":"imagenes/poleron-cierre/poleronGrisEspalda2024_800x800.png"
+            }
+        },
+        "28":{
+            nombre:"Polerón Canguro Niño",
+            precioPorTalla: { 
+                "3/4": 10000, "5/6": 10000, "7/8": 10000, "9/10": 10000, "11/12": 10000, 
+                default: 10000 
+            },
+            factorCm2: {
+                "3/4": 7.11,
+                "5/6": 8.49,
+                "7/8": 9.87,
+                "9/10": 11.24,
+                "11/12": 12.62,
+                default: 7.11
+            },
+            tallas: ["3/4", "5/6", "7/8", "9/10", "11/12"],
+            anchoRealCm: { "3/4": 36, "5/6": 39, "7/8": 42, "9/10": 45, "11/12": 48, default: 39 },
+            altoRealCm: { "3/4": 44, "5/6": 48, "7/8": 52, "9/10": 56, "11/12": 60, default: 48 },
+            areaEstampadoFrente: { top: '22%', left: '25%', width: '50%', height: '35%' },
+            areaEstampadoEspalda: { top: '20%', left: '25%', width: '50%', height: '50%' },
+            colores:{
+                gris:"imagenes/poleron-canguro-niño/poleronCanguroNinoGris.png", 
+                "gris-espalda":"imagenes/poleron-canguro-niño/poleronCanguroNinoGrisEspalda2025_800x878.png",
+                negro:"imagenes/poleron-canguro-niño/poleronCanguroNinoNegro.png", 
+                "negro-espalda":"imagenes/poleron-canguro-niño/poleronCanguroNinoNegroEspalda2025_800x878.png"
+            }
+        },
+        "27":{
+            nombre:"Polerón Polo",
+            precioPorTalla: { 
+                S: 10000, M: 10000, L: 10000, XL: 10000, "2XL": 10000, 
+                default: 10000 
+            },
+            factorCm2: {
+                S: 7.11,
+                M: 8.49,
+                L: 9.87,
+                XL: 11.24,
+                "2XL": 12.62,
+                default: 7.11
+            },
+            tallas: ["S", "M", "L", "XL", "2XL"],
+            anchoRealCm: { S: 50, M: 53, L: 56, XL: 59, "2XL": 62, default: 56 },
+            altoRealCm: { S: 64, M: 67, L: 70, XL: 73, "2XL": 76, default: 70 },
+            areaEstampadoFrente: { top: '20%', left: '25%', width: '50%', height: '55%' },
+            areaEstampadoEspalda: { top: '20%', left: '25%', width: '50%', height: '55%' },
+            colores:{
+                blanco:"imagenes/poleron-polo/Blanco.png", 
+                "blanco-espalda":"imagenes/poleron-polo/poleronPoloBlancoEspalda2025_800x800.png",
+                negro:"imagenes/poleron-polo/Negro.png", 
+                "negro-espalda":"imagenes/poleron-polo/poleronPoloNegroEspalda2025_800x800.png",
+                azul:"imagenes/poleron-polo/Azul.png", 
+                "azul-espalda":"imagenes/poleron-polo/poleronPoloAzul2025_800x800.png",
+                rojo:"imagenes/poleron-polo/Rojo.png", 
+                "rojo-espalda":"imagenes/poleron-polo/poleronPoloRojoEspalda2025_800x800.png",
+                gris:"imagenes/poleron-polo/poleronPoloGris2025_800x800.png", 
+                "gris-espalda":"imagenes/poleron-polo/poleronPoloGrisEspalda2025_800x800.png"
+            }
+        },
+        "29":{
+            nombre:"Gorros",
+            precioPorTalla: { default: 5000 },
+            factorCm2: { default: 7.11 },
+            tallas: ["Talla Única"],
+            anchoRealCm: { default: 15 },
+            altoRealCm: { default: 10 },
+            areaEstampadoFrente: { top: '25%', left: '25%', width: '50%', height: '30%' },
+            colores:{
+                negro:"imagenes/gorros/gorromallanegro_800x800.png",
+                rojo:"imagenes/gorros/gorromallarojo_800x800.png",
+                blanco:"imagenes/gorros/gorromallablanco_800x800.png"
+            }
+        },
+        "32":{
+            nombre:"Shoperos",
+            precioPorTalla: { default: 6000 },
+            factorCm2: { default: 7.11 },
+            tallas: ["Talla Única"],
+            anchoRealCm: { default: 20 },
+            altoRealCm: { default: 15 },
+            areaEstampadoFrente: { top: '25%', left: '30%', width: '30%', height: '55%' },
+            colores:{
+                "verde-limon":"imagenes/shoperos/verde.jpg",
+                "rosado":"imagenes/shoperos/rosado.jpg",
+                "rojo":"imagenes/shoperos/rojo.jpg",
+                "naranja":"imagenes/shoperos/naranja.jpg",
+                "morado":"imagenes/shoperos/morado.jpg",
+                "azul":"imagenes/shoperos/azul.jpg",
+                "amarillo":"imagenes/shoperos/amarillo.jpg"
+            }
+        },
+        "33":{
+            nombre:"Mochilas",
+            precioPorTalla: { default: 8000 },
+            factorCm2: { default: 7.11 },
+            tallas: ["Talla Única"],
+            anchoRealCm: { default: 25 },
+            altoRealCm: { default: 20 },
+            areaEstampadoFrente: { top: '20%', left: '20%', width: '60%', height: '60%' },
+            areaEstampadoEspalda: { top: '20%', left: '20%', width: '60%', height: '60%' },
+            colores:{
+                "blanco":"imagenes/mochila-cuerdas/mochilacuerdasblanco_800x923.png",
+                "blanco-espalda":"imagenes/mochila-cuerdas/mochilacuerdasblanco_800x923.png",
+                "negro":"imagenes/mochila-cuerdas/mochilacuerdasnegro_800x923.png",
+                "negro-espalda":"imagenes/mochila-cuerdas/mochilacuerdasnegro_800x923.png"
+            }
+        },
+        "36":{
+            nombre:"Tote Bag",
+            precioPorTalla: { default: 6000 },
+            factorCm2: { default: 7.11 },
+            tallas: ["Talla Única"],
+            anchoRealCm: { default: 35 },
+            altoRealCm: { default: 40 },
+            areaEstampadoFrente: { top: '53%', left: '28%', width: '46%', height: '38%' },
+            areaEstampadoEspalda: { top: '53%', left: '28%', width: '46%', height: '38%' },
+            colores:{
+                "beige":"imagenes/tote-bag/toteCrudoBeigeNew_800x1052.png",
+                "beige-espalda":"imagenes/tote-bag/toteCrudoBeigeNew_800x1052.png",
+                "negro":"imagenes/tote-bag/toteNegroFix_800x1052.png",
+                "negro-espalda":"imagenes/tote-bag/toteNegroFix_800x1052.png"
+            }
+        },
+        "38":{
+            nombre:"Polera Deportiva",
+            precioPorTalla: { default: 6000 },
+            factorCm2: { default: 7.11 },
+            tallas: ["2", "4", "6", "8", "10", "12", "14", "16"],
+            anchoRealCm: { "2": 31, "4": 33, "6": 35, "8": 37, "10": 39, "12": 41, "14": 44, "16": 47, default: 35 },
+            altoRealCm: { "2": 41, "4": 44, "6": 47, "8": 50, "10": 54, "12": 58, "14": 62, "16": 66, default: 47 },
+            areaEstampadoFrente: { top: '12%', left: '29%', width: '42%', height: '66%' },
+            areaEstampadoEspalda: { top: '8%', left: '29%', width: '42%', height: '74%' },
+            colores:{
+                "blanco":"imagenes/polera-deportiva/montecarlo_nino_blanco_frente.jpg",
+                "blanco-espalda":"imagenes/polera-deportiva/montecarlo_nino_blanco_espalda.jpg"
+            }
+        }
+    };
+
+    // ============================================
+    // CATEGORÍAS DE ICONOS (con Banderas restaurada)
+    // ============================================
+    const categoriasIconos = {
+        Amor: [
+            { src: "imagenes/iconos/amor/corazon-globos.png", nombre: "Corazon Globos" },
+            { src: "imagenes/iconos/amor/corazon.png", nombre: "Corazón" },
+            { src: "imagenes/iconos/amor/love.png", nombre: "Love" }
+        ],
+        Cumpleaños: [
+            { src: "imagenes/iconos/cumpleanos/001-party-hat.png", nombre: "Gorro Fiesta" },
+            { src: "imagenes/iconos/cumpleanos/003-balloons.png", nombre: "Globos" },
+            { src: "imagenes/iconos/cumpleanos/008-gift-box.png", nombre: "Regalo" },
+            { src: "imagenes/iconos/cumpleanos/002-birthday-cake.png", nombre: "Torta" }
+        ],
+        Banderas: [
+            { src: "imagenes/iconos/banderas/af.png", nombre: "Afganistán" },
+            { src: "imagenes/iconos/banderas/al.png", nombre: "Albania" },
+            { src: "imagenes/iconos/banderas/de.png", nombre: "Alemania" },
+            // ... (resto de banderas, todas las que tenías)
+            { src: "imagenes/iconos/banderas/ye.png", nombre: "Yemen" }
+        ]
+    };
+
+    const catalogoImagenes = [
+        "imagenes/catalogo/1.png","imagenes/catalogo/3.png","imagenes/catalogo/4.png","imagenes/catalogo/5.png",
+        "imagenes/catalogo/6.png","imagenes/catalogo/7.png","imagenes/catalogo/8.png","imagenes/catalogo/9.jpg","imagenes/catalogo/10.png",
+        "imagenes/catalogo/11.png","imagenes/catalogo/12.png","imagenes/catalogo/13.png","imagenes/catalogo/14.png",
+        "imagenes/catalogo/15.png","imagenes/catalogo/16.png","imagenes/catalogo/17.jpg","imagenes/catalogo/18.png",
+        "imagenes/catalogo/19.png","imagenes/catalogo/20.png","imagenes/catalogo/21.png","imagenes/catalogo/22.png",
+        "imagenes/catalogo/23.png","imagenes/catalogo/24.png","imagenes/catalogo/25.png","imagenes/catalogo/26.png",
+        "imagenes/catalogo/27.png","imagenes/catalogo/28.png","imagenes/catalogo/33.png","imagenes/catalogo/30.png",
+        "imagenes/catalogo/31.png","imagenes/catalogo/32.png","imagenes/catalogo/34.png"
+    ];
+    const fuentes = ["Celtics","Arial","Abril Fatface","Alfa Slab One","Audiowide","Black Han Sans","Black Ops One","Codystar","Creepster","Ewert","Faster One","Fjalla One","Fredericka the Great","Fredoka One","Galindo","Gugi","Italianno","Krona One","Libre Barcode 128 Text","Lobster","Monoton","Nosifer","Notable","Oi","Pacifico","Permanent Marker","Press Start 2P","Questrial","Righteous","Rubik Beastly","Rye","Sacramento","Staatliches","Tourney","Trade Winds","Vast Shadow","Zilla Slab Highlight","VT323"];
+    
+    let contadorElementos = 0;
+    const $areaDeEstampado = $("#areaDeEstampado");
+    let estado = {
+        productoId: "1",
+        colorNombre: "blanco",
+        tallaSeleccionada: null,
+        vistaActual: 'frente'
+    };
+    let anchoRealActualCm = 30;
+    let altoRealActualCm = 37;
+
+    // ============================================
+    // FUNCIONES DE PERSISTENCIA
+    // ============================================
+    function guardarEstado() {
+    try {
+        const diseños = [];
+        $('.elemento-personalizado').each(function() {
+            const $el = $(this);
+            const id = $el.attr('id');
+            const tipo = $el.hasClass('texto-personalizado') ? 'texto' : 'imagen';
+            let contenido = tipo === 'texto' ? $el.html() : $el.find('img').attr('src');
+            
+            // Si es una imagen en base64 muy grande, no la guardamos (opcional)
+            if (tipo === 'imagen' && contenido && contenido.startsWith('data:image') && contenido.length > 100000) {
+                // No guardamos la imagen, pero podemos guardar un placeholder
+                contenido = ''; // o no guardar este diseño
+                // También podrías omitir este diseño del array
+                return; // sale del each, no lo añade
+            }
+            
+            const estilo = {
+                width: $el.css('width'),
+                height: $el.css('height'),
+                left: $el.css('left'),
+                top: $el.css('top'),
+                fontFamily: $el.css('font-family'),
+                fontSize: $el.css('font-size'),
+                color: $el.css('color'),
+                textAlign: $el.css('text-align'),
+                fontWeight: $el.css('font-weight'),
+                fontStyle: $el.css('font-style'),
+                textDecoration: $el.css('text-decoration')
+            };
+            const dataVista = $el.data('vista');
+            diseños.push({
+                id: id,
+                tipo: tipo,
+                contenido: contenido,
+                estilo: estilo,
+                vista: dataVista
+            });
+        });
+        localStorage.setItem('sublimar_disenos', JSON.stringify(diseños));
+    } catch (e) {
+        console.warn('No se pudo guardar el estado en localStorage:', e);
+        // Puedes mostrar un mensaje no intrusivo al usuario si quieres
+    }
+}
+
+    function cargarEstado() {
+        const guardado = localStorage.getItem('sublimar_disenos');
+        if (!guardado) return;
+        const diseños = JSON.parse(guardado);
+        $('.elemento-personalizado').remove();
+        $('.item-cargado').remove();
+        contadorElementos = 0;
+        diseños.forEach(d => {
+            contadorElementos++;
+            const id = d.id || "elemento-" + contadorElementos;
+            const $contenedorDiseño = $(`#diseños${d.vista === 'frente' ? 'Frente' : 'Espalda'}`);
+            const $contenedorLista = $(`#lista${d.vista === 'frente' ? 'Frente' : 'Espalda'}`);
+            if (d.tipo === 'imagen') {
+                const $el = $(`<div id="${id}" class="elemento-personalizado" data-vista="${d.vista}" style="width: ${d.estilo.width}; height: ${d.estilo.height}; left: ${d.estilo.left}; top: ${d.estilo.top};"><img src="${d.contenido}"></div>`);
+                $contenedorDiseño.append($el);
+                const $item = $(`
+                    <div class="item-cargado" data-target-id="${id}" data-vista="${d.vista}">
+                        <div class="preview-img-container">
+                            <img src="${d.contenido}" class="preview-img">
+                        </div>
+                        <div class="detalle-estampado">
+                            <div class="detalle-linea"><strong>Tipo de estampado:</strong> DTF Textil</div>
+                            <div class="detalle-linea"><strong>Ancho:</strong> <span class="detalle-ancho">0</span> cm (aprox)</div>
+                            <div class="detalle-linea"><strong>Alto:</strong> <span class="detalle-alto">0</span> cm (aprox)</div>
+                            <button class="btn-eliminar-detalle">Eliminar</button>
+                        </div>
+                    </div>`);
+                $contenedorLista.append($item);
+                hacerInteractivo($el);
+            } else {
+                const $el = $(`<div id="${id}" class="elemento-personalizado texto-personalizado" data-vista="${d.vista}" style="${Object.entries(d.estilo).map(([k,v]) => k+':'+v).join(';')}">${d.contenido}</div>`);
+                $contenedorDiseño.append($el);
+                const $item = $(`
+                    <div class="item-cargado" data-target-id="${id}" data-vista="${d.vista}">
+                        <div class="preview-img-container">
+                            <span style="font-size: 32px; padding: 5px; display: block; text-align: center;">T</span>
+                        </div>
+                        <div class="detalle-estampado">
+                            <div class="detalle-linea"><strong>Tipo de estampado:</strong> DTF Textil</div>
+                            <div class="detalle-linea"><strong>Ancho:</strong> <span class="detalle-ancho">0</span> cm (aprox)</div>
+                            <div class="detalle-linea"><strong>Alto:</strong> <span class="detalle-alto">0</span> cm (aprox)</div>
+                            <button class="btn-eliminar-detalle">Eliminar</button>
+                        </div>
+                    </div>`);
+                $contenedorLista.append($item);
+                hacerInteractivo($el);
+            }
+        });
+        actualizarMedidasDeTodosLosElementos();
+        actualizarPrecio();
+        actualizarVisibilidadDiseños();
+    }
+
+    // ============================================
+    // FUNCIÓN DE PRECIO (con factor por cm² por talla)
+    // ============================================
+    function actualizarPrecio() {
+        const p = productos[estado.productoId];
+        const cant = +$("#txtCantidad").val();
+        
+        let base = 0;
+        if (p.precioPorTalla) {
+            if (estado.tallaSeleccionada && p.precioPorTalla[estado.tallaSeleccionada]) {
+                base = p.precioPorTalla[estado.tallaSeleccionada];
+            } else {
+                base = p.precioPorTalla.default || 0;
+            }
+        }
+        
+        let factor = 0;
+        if (p.factorCm2) {
+            if (estado.tallaSeleccionada && p.factorCm2[estado.tallaSeleccionada]) {
+                factor = p.factorCm2[estado.tallaSeleccionada];
+            } else {
+                factor = p.factorCm2.default || 0;
+            }
+        }
+        
+        let cargoDisenos = 0;
+        let detalleDisenos = [];
+        $('.item-cargado').each(function() {
+            const $item = $(this);
+            const anchoCm = parseFloat($item.find('.detalle-ancho').text()) || 0;
+            const altoCm = parseFloat($item.find('.detalle-alto').text()) || 0;
+            const area = anchoCm * altoCm;
+            
+            const cargoDiseno = area * factor;
+            cargoDisenos += cargoDiseno;
+            detalleDisenos.push(`<div>• Diseño: ${anchoCm.toFixed(1)}×${altoCm.toFixed(1)} cm = ${area.toFixed(0)} cm² → $${Math.round(cargoDiseno).toLocaleString()}</div>`);
+        });
+        
+        const subtotal = base + cargoDisenos;
+        const total = subtotal * cant;
+        
+        $(".precio-valor").text("$" + Math.round(total).toLocaleString());
+        $("#precioDesglose").html(`
+            <div><strong>Precio base</strong> (talla ${estado.tallaSeleccionada || 'N/A'}): $${base.toLocaleString()}</div>
+            ${detalleDisenos.join('')}
+            <div><strong>Cargo total diseños:</strong> $${Math.round(cargoDisenos).toLocaleString()}</div>
+            <div><strong>Subtotal:</strong> $${Math.round(subtotal).toLocaleString()}</div>
+            <div><strong>Cantidad:</strong> ${cant}</div>
+            <div style="margin-top:4px; border-top:1px dashed #ccc; padding-top:4px;"><strong>Total:</strong> $${Math.round(total).toLocaleString()}</div>
+        `);
+    }
+
+    // ============================================
+    // FUNCIONES DE MEDIDAS Y REESCALADO (sin cambios)
+    // ============================================
+    function actualizarMedidasDeTodosLosElementos() {
+        $('.item-cargado').each(function() {
+            const $item = $(this);
+            const targetId = $item.data('target-id');
+            const $elemento = $('#' + targetId);
+            if ($elemento.length) {
+                const areaAnchoPx = $areaDeEstampado.width();
+                const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+                const anchoPx = $elemento.width();
+                const altoPx = $elemento.height();
+                const anchoCm = (anchoPx / pixelesPorCm).toFixed(1);
+                const altoCm = (altoPx / pixelesPorCm).toFixed(1);
+                $item.find('.detalle-ancho').text(anchoCm);
+                $item.find('.detalle-alto').text(altoCm);
+            }
+        });
+    }
+
+    function reescalarDisenosAlNuevoProducto() {
+        const areaAncho = $areaDeEstampado.width();
+        const areaAlto = $areaDeEstampado.height();
+        
+        $('.elemento-personalizado').each(function() {
+            const $el = $(this);
+            const anchoActual = $el.width();
+            const altoActual = $el.height();
+            
+            const factorAncho = areaAncho / anchoActual;
+            const factorAlto = areaAlto / altoActual;
+            const factor = Math.min(factorAncho, factorAlto) * 0.9;
+            
+            const nuevoAncho = anchoActual * factor;
+            const nuevoAlto = altoActual * factor;
+            $el.css({
+                width: nuevoAncho + 'px',
+                height: nuevoAlto + 'px',
+                left: (areaAncho / 2) - (nuevoAncho / 2) + 'px',
+                top: (areaAlto / 2) - (nuevoAlto / 2) + 'px'
+            });
+            
+            const id = $el.attr('id');
+            const $item = $(`.item-cargado[data-target-id="${id}"]`);
+            if ($item.length) {
+                const areaAnchoPx = areaAncho;
+                const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+                const anchoCm = (nuevoAncho / pixelesPorCm).toFixed(1);
+                const altoCm = (nuevoAlto / pixelesPorCm).toFixed(1);
+                $item.find('.detalle-ancho').text(anchoCm);
+                $item.find('.detalle-alto').text(altoCm);
+            }
+        });
+        guardarEstado();
+    }
+
+    function reescalarDisenosPorTalla() {
+        const areaAnchoPx = $areaDeEstampado.width();
+        const areaAltoPx = $areaDeEstampado.height();
+        if (areaAnchoPx === 0 || areaAltoPx === 0) return;
+
+        const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+
+        $('.elemento-personalizado').each(function() {
+            const $el = $(this);
+            const id = $el.attr('id');
+            const $item = $(`.item-cargado[data-target-id="${id}"]`);
+
+            let anchoCm = parseFloat($item.find('.detalle-ancho').text()) || 0;
+            let altoCm = parseFloat($item.find('.detalle-alto').text()) || 0;
+
+            if (anchoCm > 0 && altoCm > 0) {
+                let nuevoAnchoPx = anchoCm * pixelesPorCm;
+                let nuevoAltoPx = altoCm * pixelesPorCm;
+
+                if (nuevoAnchoPx > areaAnchoPx) {
+                    const factor = areaAnchoPx / nuevoAnchoPx;
+                    nuevoAnchoPx = areaAnchoPx;
+                    nuevoAltoPx *= factor;
+                }
+                if (nuevoAltoPx > areaAltoPx) {
+                    const factor = areaAltoPx / nuevoAltoPx;
+                    nuevoAltoPx = areaAltoPx;
+                    nuevoAnchoPx *= factor;
+                }
+
+                anchoCm = nuevoAnchoPx / pixelesPorCm;
+                altoCm = nuevoAltoPx / pixelesPorCm;
+
+                const centroX = $el.position().left + $el.width() / 2;
+                const centroY = $el.position().top + $el.height() / 2;
+                const propX = centroX / areaAnchoPx;
+                const propY = centroY / areaAltoPx;
+
+                $el.css({
+                    width: nuevoAnchoPx,
+                    height: nuevoAltoPx,
+                    left: (propX * areaAnchoPx) - nuevoAnchoPx / 2,
+                    top: (propY * areaAltoPx) - nuevoAltoPx / 2
+                });
+
+                $item.find('.detalle-ancho').text(anchoCm.toFixed(1));
+                $item.find('.detalle-alto').text(altoCm.toFixed(1));
+            }
+        });
+
+        $('.elemento-personalizado').each(function() {
+            const $el = $(this);
+            if ($el.hasClass('ui-draggable')) $el.draggable('destroy');
+            if ($el.hasClass('ui-resizable')) $el.resizable('destroy');
+            hacerInteractivo($el);
+        });
+
+        guardarEstado();
+        actualizarPrecio();
+    }
+
+    function revalidarLimitesDisenos() {
+        const areaAnchoPx = $areaDeEstampado.width();
+        const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+        
+        $('.elemento-personalizado').each(function() {
+            const $el = $(this);
+            let anchoPx = $el.width();
+            let altoPx = $el.height();
+            let anchoCm = anchoPx / pixelesPorCm;
+            let altoCm = altoPx / pixelesPorCm;
+            
+            if (anchoCm > MAX_CM) {
+                const factor = MAX_CM / anchoCm;
+                anchoPx = anchoPx * factor;
+                altoPx = altoPx * factor;
+                $el.css({ width: anchoPx, height: altoPx });
+                
+                const id = $el.attr('id');
+                const $item = $(`.item-cargado[data-target-id="${id}"]`);
+                if ($item.length) {
+                    $item.find('.detalle-ancho').text((anchoPx / pixelesPorCm).toFixed(1));
+                    $item.find('.detalle-alto').text((altoPx / pixelesPorCm).toFixed(1));
+                }
+            }
+        });
+        actualizarPrecio();
+    }
+
+    // ============================================
+    // BOTÓN WHATSAPP (sin cambios)
+    // ============================================
+    async function compartirWhatsApp() {
+        const elementoCapturar = document.getElementById('capture');
+        if (!elementoCapturar) return;
+        
+        const $areaEstampado = $('#areaDeEstampado');
+        const bordeOriginal = $areaEstampado.css('border');
+        $areaEstampado.css('border', 'none');
+        
+        try {
+            const canvas = await html2canvas(elementoCapturar, { 
+                allowTaint: false,
+                useCORS: true,
+                backgroundColor: null,
+                scale: 1,
+                logging: false
+            });
+            
+            $areaEstampado.css('border', bordeOriginal);
+            
+            let diseñosInfo = [];
+            let precioTotal = $(".precio-valor").text();
+            let cantidad = $("#txtCantidad").val();
+            let producto = productos[estado.productoId];
+            let talla = estado.tallaSeleccionada || 'No especificada';
+            
+            $('.item-cargado').each(function(index) {
+                const ancho = $(this).find('.detalle-ancho').text();
+                const alto = $(this).find('.detalle-alto').text();
+                diseñosInfo.push(`Diseño ${index+1}: ${ancho} cm × ${alto} cm`);
+            });
+            
+            let mensajeTexto = `Hola, quiero consultar por este diseño:%0A%0A`;
+            mensajeTexto += `▪️ Producto: ${producto.nombre}%0A`;
+            mensajeTexto += `▪️ Talla: ${talla}%0A`;
+            mensajeTexto += `▪️ Cantidad: ${cantidad}%0A`;
+            if (diseñosInfo.length > 0) {
+                mensajeTexto += `▪️ Estampados:%0A`;
+                diseñosInfo.forEach(info => mensajeTexto += `   ${info}%0A`);
+            }
+            mensajeTexto += `▪️ Precio total: ${precioTotal}%0A%0A`;
+            mensajeTexto += `(Adjunto la imagen del diseño)`;
+
+            canvas.toBlob(async (blob) => {
+                if (navigator.share && blob) {
+                    const file = new File([blob], 'mi-diseno.png', { type: 'image/png' });
+                    try {
+                        await navigator.share({
+                            title: 'Mi diseño personalizado',
+                            text: mensajeTexto.replace(/%0A/g, '\n'),
+                            files: [file]
+                        });
+                        return;
+                    } catch (shareError) {
+                        console.log('Error al compartir, usando método alternativo', shareError);
+                    }
+                }
+                
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'mi-diseno.png';
+                link.href = url;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
+                const whatsappUrl = `https://wa.me/?text=${mensajeTexto}`;
+                window.open(whatsappUrl, '_blank');
+            }, 'image/png');
+            
+        } catch (error) {
+            $areaEstampado.css('border', bordeOriginal);
+            console.error("Error al generar imagen para WhatsApp:", error);
+            if (window.location.protocol === 'file:') {
+                alert("Seguridad del navegador: Para generar imágenes o enviar por WhatsApp, debes abrir esta página desde un servidor web (Vercel, Supabase, o Live Server local). Abriendo el archivo directo (file://) no se permite exportar imágenes.");
+            } else {
+                alert("No se pudo generar la imagen. Intenta de nuevo.");
+            }
+        }
+    }
+
+    // ============================================
+    // HACER INTERACTIVO (sin cambios)
+    // ============================================
+    function hacerInteractivo($e) {
+    const esImagen = $e.find('img').length > 0;
+    
+    // Eliminar eventos previos para evitar duplicados
+    $e.off("mousedown").on("mousedown", e => { 
+        e.stopPropagation(); 
+        seleccionarElemento($e); 
+    });
+    
+    // Destruir draggable previo si existe y volver a crearlo
+    if ($e.hasClass('ui-draggable')) {
+        $e.draggable('destroy');
+    }
+    $e.draggable({ 
+        containment: "#areaDeEstampado",
+        stop: guardarEstado
+    });
+    
+    // Destruir resizable previo si existe
+    if ($e.hasClass('ui-resizable')) {
+        $e.resizable('destroy');
+    }
+    
+    const opcionesResize = {
+        containment: "#areaDeEstampado",
+        resize: function(event, ui) {
+            const areaAnchoPx = $areaDeEstampado.width();
+            const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+            
+            let anchoCm = ui.size.width / pixelesPorCm;
+            let altoCm = ui.size.height / pixelesPorCm;
+            
+            // Limitar a MAX_CM si es necesario
+            if (anchoCm > MAX_CM) {
+                const factor = MAX_CM / anchoCm;
+                ui.size.width = ui.size.width * factor;
+                ui.size.height = ui.size.height * factor;
+                anchoCm = ui.size.width / pixelesPorCm;
+                altoCm = ui.size.height / pixelesPorCm;
+            }
+            
+            const anchoCmFixed = anchoCm.toFixed(1);
+            const altoCmFixed = altoCm.toFixed(1);
+            
+            const id = ui.helper.attr('id');
+            const $itemEnLista = $(`[data-target-id="${id}"]`);
+            $itemEnLista.find('.detalle-ancho').text(anchoCmFixed);
+            $itemEnLista.find('.detalle-alto').text(altoCmFixed);
+            actualizarPrecio();
+            
+            // ✅ NO MODIFICAR MANUALMENTE EL TAMAÑO (jQuery UI ya lo aplica)
+            
+            // Actualizar el containment del draggable durante el resize
+            $(this).draggable('option', 'containment', '#areaDeEstampado');
+        },
+        stop: function(event, ui) {
+            guardarEstado();
+            // Re-crear draggable para asegurar que funcione después del resize
+            $(this).draggable('destroy');
+            $(this).draggable({
+                containment: "#areaDeEstampado",
+                stop: guardarEstado
+            });
+        }
+    };
+    
+    if (esImagen) {
+        opcionesResize.aspectRatio = true;
+    }
+    
+    $e.resizable(opcionesResize);
+    $e.find(".ui-resizable-se").removeClass("ui-icon ui-icon-gripsmall-diagonal-se");
+}
+
+    // ============================================
+    // AGREGAR ELEMENTO (sin cambios)
+    // ============================================
+    function agregarElemento(tipo, data) {
+        contadorElementos++;
+        const id = "elemento-" + contadorElementos;
+        const vista = estado.vistaActual;
+        const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
+        const $contenedorDiseño = $(`#diseños${capitalizar(vista)}`);
+        const $contenedorLista = $(`#lista${capitalizar(vista)}`);
+        $('#listaElementosCargados').find('.placeholder').remove();
+        let $el, $item;
+        
+        if (tipo === "imagen"){
+            const img = new Image();
+            img.onload = function() {
+                let anchoInicial = this.width;
+                let altoInicial = this.height;
+                const areaAncho = $areaDeEstampado.width();
+                const maxAncho = areaAncho * 0.4;
+                if (anchoInicial > maxAncho) {
+                    const ratio = altoInicial / anchoInicial;
+                    anchoInicial = maxAncho;
+                    altoInicial = maxAncho * ratio;
+                }
+                
+                const areaAnchoPx = $areaDeEstampado.width();
+                const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+                let anchoCm = anchoInicial / pixelesPorCm;
+                let altoCm = altoInicial / pixelesPorCm;
+                
+                if (anchoCm > MAX_CM) {
+                    const factor = MAX_CM / anchoCm;
+                    anchoInicial = anchoInicial * factor;
+                    altoInicial = altoInicial * factor;
+                    anchoCm = anchoInicial / pixelesPorCm;
+                    altoCm = altoInicial / pixelesPorCm;
+                }
+                
+                const anchoCmFixed = anchoCm.toFixed(1);
+                const altoCmFixed = altoCm.toFixed(1);
+
+                $el = $(`<div id="${id}" class="elemento-personalizado" data-vista="${vista}" style="width: ${anchoInicial}px; height: ${altoInicial}px;"><img src="${data.src}"></div>`);
+                $item = $(`
+                    <div class="item-cargado" data-target-id="${id}" data-vista="${vista}">
+                        <div class="preview-img-container">
+                            <img src="${data.src}" class="preview-img">
+                        </div>
+                        <div class="detalle-estampado">
+                            <div class="detalle-linea"><strong>Tipo de estampado:</strong> DTF Textil</div>
+                            <div class="detalle-linea"><strong>Ancho:</strong> <span class="detalle-ancho">${anchoCmFixed}</span> cm (aprox)</div>
+                            <div class="detalle-linea"><strong>Alto:</strong> <span class="detalle-alto">${altoCmFixed}</span> cm (aprox)</div>
+                            <button class="btn-eliminar-detalle">Eliminar</button>
+                        </div>
+                    </div>`);
+                
+                $contenedorDiseño.append($el);
+                const areaAlto = $areaDeEstampado.height();
+                $el.css({
+                    left: (areaAncho / 2) - ($el.outerWidth() / 2) + 'px',
+                    top: (areaAlto / 2) - ($el.outerHeight() / 2) + 'px'
+                });
+
+                $contenedorLista.append($item);
+                
+                setTimeout(function() {
+                    hacerInteractivo($el);
+                    seleccionarElemento($el);
+                }, 50);
+                
+                actualizarPrecio();
+                guardarEstado();
+            };
+            img.onerror = function() {
+                alert("No se pudo cargar la imagen. Intenta con otra.");
+            };
+            img.src = data.src;
+        } else {
+            $el = $(`<div id="${id}" class="elemento-personalizado texto-personalizado" data-vista="${vista}">${data.texto}</div>`);
+            
+            $contenedorDiseño.append($el);
+            const elAncho = $el.outerWidth();
+            const elAlto = $el.outerHeight();
+            const areaAncho = $areaDeEstampado.width();
+            const areaAlto = $areaDeEstampado.height();
+            $el.css({
+                left: (areaAncho / 2) - (elAncho / 2) + 'px',
+                top: (areaAlto / 2) - (elAlto / 2) + 'px'
+            });
+
+            const areaAnchoPx = $areaDeEstampado.width();
+            const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+            let anchoCm = elAncho / pixelesPorCm;
+            let altoCm = elAlto / pixelesPorCm;
+            
+            if (anchoCm > MAX_CM) {
+                const factor = MAX_CM / anchoCm;
+                $el.css({
+                    width: elAncho * factor,
+                    height: elAlto * factor,
+                    left: (areaAncho / 2) - (elAncho * factor / 2) + 'px',
+                    top: (areaAlto / 2) - (elAlto * factor / 2) + 'px'
+                });
+                anchoCm = anchoCm * factor;
+                altoCm = altoCm * factor;
+            }
+
+            $item = $(`
+                <div class="item-cargado" data-target-id="${id}" data-vista="${vista}">
+                    <div class="preview-img-container">
+                        <span style="font-size: 32px; padding: 5px; display: block; text-align: center;">T</span>
+                    </div>
+                    <div class="detalle-estampado">
+                        <div class="detalle-linea"><strong>Tipo de estampado:</strong> DTF Textil</div>
+                        <div class="detalle-linea"><strong>Ancho:</strong> <span class="detalle-ancho">${anchoCm.toFixed(1)}</span> cm (aprox)</div>
+                        <div class="detalle-linea"><strong>Alto:</strong> <span class="detalle-alto">${altoCm.toFixed(1)}</span> cm (aprox)</div>
+                        <button class="btn-eliminar-detalle">Eliminar</button>
+                    </div>
+                </div>`);
+
+            $contenedorLista.append($item);
+            hacerInteractivo($el);
+            seleccionarElemento($el);
+            actualizarPrecio();
+            guardarEstado();
+        }
+    }
+
+    // ============================================
+    // RESTO DE FUNCIONES (seleccionar, editor, visor, tallas, etc.)
+    // ============================================
+    function seleccionarElemento($e) {
+        $(".elemento-personalizado").removeClass("seleccionado");
+        $(".item-cargado").removeClass("seleccionado-en-lista");
+        $('#panelEditorTexto').empty();
+        if ($e && $e.length) {
+            $e.addClass("seleccionado");
+            $(`[data-target-id="${$e.attr("id")}"]`).addClass("seleccionado-en-lista");
+            if ($e.hasClass('texto-personalizado')) {
+                mostrarEditorDeTexto($e);
+            }
+        }
+    }
+
+    function mostrarEditorDeTexto($el) {
+        const id = $el.attr('id');
+        const $editorPanel = $('#panelEditorTexto');
+        $editorPanel.off();
+        
+        const contenidoActual = $el.clone().find('.ui-resizable-handle').remove().end().html().replace(/<br\s*\/?>/gi, "\n");
+        const fuenteActual = $el.css('font-family').replace(/["']/g, '').split(',')[0];
+        const colorActual = $el.css('color');
+        const tamanoActual = parseInt($el.css('font-size'));
+        const alineadoActual = $el.css('text-align');
+        const esNegrita = $el.css('font-weight') === '700' || $el.css('font-weight') === 'bold';
+        const esCursiva = $el.css('font-style') === 'italic';
+        const esSubrayado = $el.css('text-decoration').includes('underline');
+        const rgbMatch = colorActual.match(/\d+/g);
+        const colorHex = rgbMatch ? "#" + (+rgbMatch[0]).toString(16).padStart(2, '0') + (+rgbMatch[1]).toString(16).padStart(2, '0') + (+rgbMatch[2]).toString(16).padStart(2, '0') : '#000000';
+        const opcionesFuente = fuentes.map(f => `<option value="${f}" ${f === fuenteActual ? 'selected' : ''}>${f}</option>`).join("");
+        const editorHtml = `
+            <div class="panel-editor-texto-externo" data-target-id="${id}">
+                <div class="editor-fila"><label>Texto</label><textarea id="editor-contenido">${contenidoActual}</textarea></div>
+                <div class="editor-grid">
+                    <div class="editor-item"><label>Fuente</label><select id="editor-fuente">${opcionesFuente}</select></div>
+                    <div class="editor-item"><label>Color</label><input type="color" id="editor-color" value="${colorHex}"></div>
+                </div>
+                <div class="editor-grid" style="margin-top: 10px;">
+                    <div class="editor-item">
+                        <label>Alineado</label>
+                        <div class="grupo-botones">
+                           <button class="btn-editor btn-align ${alineadoActual === 'left' ? 'active' : ''}" data-align="left">L</button>
+                           <button class="btn-editor btn-align ${alineadoActual === 'center' ? 'active' : ''}" data-align="center">C</button>
+                           <button class="btn-editor btn-align ${alineadoActual === 'right' ? 'active' : ''}" data-align="right">R</button>
+                        </div>
+                    </div>
+                    <div class="editor-item">
+                        <label>Decoración</label>
+                        <div class="grupo-botones">
+                            <button class="btn-editor btn-decor ${esNegrita ? 'active' : ''}" data-decor="bold"><b>B</b></button>
+                            <button class="btn-editor btn-decor cursiva ${esCursiva ? 'active' : ''}" data-decor="italic">I</button>
+                            <button class="btn-editor btn-decor subrayado ${esSubrayado ? 'active' : ''}" data-decor="underline">U</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-fila" style="margin-top: 10px;">
+                    <label>Tamaño: <span id="tamano-valor">${tamanoActual}</span>px</label>
+                    <input type="range" id="editor-tamano" min="10" max="200" value="${tamanoActual}">
+                </div>
+            </div>`;
+        
+        $editorPanel.html(editorHtml);
+
+        function actualizarTextoEnDiseño() {
+            const contenido = $('#editor-contenido').val().replace(/\n/g, '<br>');
+            const nombreFuente = $('#editor-fuente').val();
+            $el.html(contenido);
+            $el.css({
+                'font-family': `'${nombreFuente}'`,
+                'color': $('#editor-color').val(),
+                'font-size': $('#editor-tamano').val() + 'px',
+                'font-weight': $editorPanel.find('.btn-decor[data-decor="bold"]').hasClass('active') ? 'bold' : 'normal',
+                'font-style': $editorPanel.find('.btn-decor[data-decor="italic"]').hasClass('active') ? 'italic' : 'normal',
+                'text-decoration': $editorPanel.find('.btn-decor[data-decor="underline"]').hasClass('active') ? 'underline' : 'none'
+            });
+            $('#tamano-valor').text($('#editor-tamano').val());
+            const areaAnchoPx = $areaDeEstampado.width();
+            const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
+            const anchoCm = ($el.outerWidth() / pixelesPorCm).toFixed(1);
+            const altoCm = ($el.outerHeight() / pixelesPorCm).toFixed(1);
+            const $itemEnLista = $(`.item-cargado[data-target-id="${id}"]`);
+            $itemEnLista.find('.detalle-ancho').text(anchoCm);
+            $itemEnLista.find('.detalle-alto').text(altoCm);
+            actualizarPrecio();
+            guardarEstado();
+        }
+
+        $editorPanel.on('input change', '#editor-contenido, #editor-fuente, #editor-color, #editor-tamano', actualizarTextoEnDiseño);
+        $editorPanel.on('click', '.btn-align', function() {
+            $('.btn-align').removeClass('active');
+            $(this).addClass('active');
+            $el.css('text-align', $(this).data('align'));
+            actualizarTextoEnDiseño();
+        });
+        $editorPanel.on('click', '.btn-decor', function() {
+            $(this).toggleClass('active');
+            actualizarTextoEnDiseño();
+        });
+    }
+
+    function actualizarVisor() {
+        const p = productos[estado.productoId];
+        let colorKey = estado.colorNombre;
+        if (estado.vistaActual === 'espalda') {
+            const keyEspalda = `${estado.colorNombre}-espalda`;
+            if (p.colores[keyEspalda] && !p.colores[keyEspalda].startsWith("//")) {
+                colorKey = keyEspalda;
+            } else {
+                colorKey = estado.colorNombre;
+            }
+        }
+        let url = p.colores[colorKey];
+        if (!url || url.startsWith("//")) {
+            const coloresDisponibles = Object.keys(p.colores).filter(c => !c.includes('-espalda') && p.colores[c] && !p.colores[c].startsWith("//"));
+            if (coloresDisponibles.length > 0) {
+                estado.colorNombre = coloresDisponibles[0];
+                url = p.colores[estado.colorNombre];
+            } else {
+                url = "";
+            }
+        }
+        if (url) $("#imagenSuperficie").attr("src", url);
+        $(".itemColores").each(function() {
+            const c = $(this).data("color");
+            $(this).attr('title', c.replace(/-/g, ' '));
+            const disp = p.colores[c] && !p.colores[c].startsWith("//");
+            $(this).toggleClass("disabled", !disp).toggleClass("selected", c === estado.colorNombre);
+        });
+        
+        let area = p.areaEstampadoFrente;
+        if (estado.vistaActual === 'espalda') {
+            area = p.areaEstampadoEspalda || p.areaEstampadoFrente;
+        }
+
+        if (area) {
+            $("#areaDeEstampado").css({
+                top: area.top,
+                left: area.left,
+                width: area.width,
+                height: area.height
+            });
+        }
+    }
+
+    function actualizarTallas() {
+        const productoActual = productos[estado.productoId];
+        const $panelTallas = $('.panel-tallas');
+        const $listaTallas = $('.lista-tallas');
+        
+        if (productoActual.tallas && productoActual.tallas.length > 0) {
+            $listaTallas.empty();
+            productoActual.tallas.forEach(talla => {
+                $listaTallas.append($(`<div class="itemTalla">${talla}</div>`));
+            });
+            const primeraTalla = $listaTallas.children().first();
+            if (primeraTalla.length > 0) {
+                primeraTalla.addClass('selected');
+                estado.tallaSeleccionada = primeraTalla.text();
+                if (productoActual.anchoRealCm && productoActual.anchoRealCm[estado.tallaSeleccionada]) {
+                    anchoRealActualCm = productoActual.anchoRealCm[estado.tallaSeleccionada];
+                } else {
+                    anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
+                }
+                if (productoActual.altoRealCm && productoActual.altoRealCm[estado.tallaSeleccionada]) {
+                    altoRealActualCm = productoActual.altoRealCm[estado.tallaSeleccionada];
+                } else {
+                    altoRealActualCm = productoActual.altoRealCm?.default || 37;
+                }
+            } else {
+                estado.tallaSeleccionada = null;
+                anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
+                altoRealActualCm = productoActual.altoRealCm?.default || 37;
+            }
+            $panelTallas.show();
+        } else {
+            $panelTallas.hide();
+            estado.tallaSeleccionada = null;
+            anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
+            altoRealActualCm = productoActual.altoRealCm?.default || 37;
+        }
+        actualizarMedidasDeTodosLosElementos();
+        actualizarPrecio();
+    }
+
+    function actualizarVisibilidadDiseños() {
+        const vista = estado.vistaActual;
+        const vistaOpuesta = vista === 'frente' ? 'espalda' : 'frente';
+        const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+        $(`#diseños${capitalizar(vista)}`).removeClass('hidden');
+        $(`#diseños${capitalizar(vistaOpuesta)}`).addClass('hidden');
+
+        $(`#lista${capitalizar(vista)}`).removeClass('hidden');
+        $(`#lista${capitalizar(vistaOpuesta)}`).addClass('hidden');
+
+        $('#tituloListaDiseños').text(`Mis Diseños Actuales - ${capitalizar(vista)}`);
+
+        const $contenedorLista = $('#listaElementosCargados');
+        $contenedorLista.find('.placeholder').remove();
+
+        const hayItemsEnTotal = $('.item-cargado').length > 0;
+        const hayItemsEnVistaActual = $(`.item-cargado[data-vista="${vista}"]`).length > 0;
+
+        if (!hayItemsEnTotal) {
+            $contenedorLista.append('<div class="placeholder">Añade una imagen o texto para empezar.</div>');
+        } else if (!hayItemsEnVistaActual) {
+            $contenedorLista.append('<div class="placeholder">No hay diseños en esta vista.</div>');
+        }
+    }
+
+    function renderizarCategoriasIconos() {
+        const $contenedor = $('#vista-categorias-iconos');
+        let html = '<div id="grilla-categorias">';
+        for (const categoria in categoriasIconos) {
+            const iconosPreview = categoriasIconos[categoria].slice(0, 4);
+            html += `
+                <div class="categoria-caja">
+                    <h3>${categoria}</h3>
+                    <div class="categoria-preview">
+                        ${iconosPreview.map(icono => `<img src="${icono.src}" alt="${icono.nombre}">`).join('')}
+                    </div>
+                    <button class="btn-ver-categoria" data-categoria="${categoria}">Ver</button>
+                </div>`;
+        }
+        html += '</div>';
+        $contenedor.html(html);
+    }
+
+    function mostrarIconosDeCategoria(categoria) {
+        $('#vista-categorias-iconos').addClass('hidden');
+        const $contenedor = $('#vista-iconos-individuales').removeClass('hidden');
+        
+        const iconos = categoriasIconos[categoria];
+        let html = `
+            <h3>${categoria}</h3>
+            <div class="grilla-items-modal">
+                ${iconos.map(icono => `<img src="${icono.src}" title="${icono.nombre}" class="icono-item">`).join('')}
+            </div>
+            <button class="btn-volver-categorias">Volver a Categorías</button>`;
+        
+        $contenedor.html(html);
+    }
+
+    function renderizarCatalogo() {
+        const $c = $('#grilla-catalogo-imagenes'); 
+        let html = "";
+        catalogoImagenes.forEach(u => { 
+            if (!u.startsWith("//")) html += `<img src="${u}" class="catalogo-item">`; 
+        }); 
+        $c.html(html);
+    }
+
+    // ============================================
+    // EVENTOS (sin cambios)
+    // ============================================
+    $(document).ready(function() {
+        cargarEstado();
+        actualizarVisibilidadDiseños();
+        actualizarVisor();
+        actualizarPrecio();
+        actualizarTallas();
+        
+        $("#btnIconos").on("click", function() {
+            renderizarCategoriasIconos();
+            $('#vista-categorias-iconos').removeClass('hidden');
+            $('#vista-iconos-individuales').addClass('hidden');
+            $("#modal-iconos-overlay").removeClass("hidden");
+        });
+
+        $("#btnCatalogo").on("click", function() {
+            renderizarCatalogo();
+            $("#modal-catalogo-overlay").removeClass("hidden");
+        });
+
+        $('#modal-iconos-overlay').on('click', '.btn-ver-categoria', function() {
+            const categoria = $(this).data('categoria');
+            mostrarIconosDeCategoria(categoria);
+        });
+
+        $('#modal-iconos-overlay').on('click', '.btn-volver-categorias', function() {
+            $('#vista-iconos-individuales').addClass('hidden');
+            $('#vista-categorias-iconos').removeClass('hidden');
+        });
+
+        $('#modal-iconos-overlay').on("click", ".icono-item", function() {
+            agregarElemento("imagen", { src: $(this).attr("src") });
+            $("#modal-iconos-overlay").addClass("hidden");
+        });
+        
+        $(document).on('mousedown', function(e) {
+            const $target = $(e.target);
+            if (!$target.closest('.elemento-personalizado').length && !$target.closest('.item-cargado').length && !$target.closest('#panelEditorTexto').length) {
+                seleccionarElemento(null);
+            }
+        });
+
+        $("#btnWhatsApp").on("click", compartirWhatsApp);
+    });
+
+    $("#btnSubirImagen").on("click", () => $("#subirImagenInput").click());
+    $("#subirImagenInput").on("change", function(e) {
+        if (e.target.files[0]) {
+            const r = new FileReader();
+            r.onload = ev => {
+                agregarElemento("imagen", { src: ev.target.result });
+                guardarEstado();
+            };
+            r.readAsDataURL(e.target.files[0]);
+        }
+        $(this).val("");
+    });
+    $("#btnAgregarTexto").on("click", () => {
+        agregarElemento("texto", { texto: "Tu Texto" });
+        guardarEstado();
+    });
+    $("#btnMas").on("click", () => { $("#txtCantidad").val(+$("#txtCantidad").val() + 1); actualizarPrecio(); guardarEstado(); });
+    $("#btnMenos").on("click", () => { const a = +$("#txtCantidad").val(); if (a > 1) $("#txtCantidad").val(a - 1); actualizarPrecio(); guardarEstado(); });
+    
+    $("#btnAgregarAlCarrito").on("click", async function() {
+        const p = productos[estado.productoId];
+        const cant = +$("#txtCantidad").val();
+        
+        let base = 0;
+        if (p.precioPorTalla) {
+            if (estado.tallaSeleccionada && p.precioPorTalla[estado.tallaSeleccionada]) {
+                base = p.precioPorTalla[estado.tallaSeleccionada];
+            } else {
+                base = p.precioPorTalla.default || 0;
+            }
+        }
+        
+        let factor = 0;
+        if (p.factorCm2) {
+            if (estado.tallaSeleccionada && p.factorCm2[estado.tallaSeleccionada]) {
+                factor = p.factorCm2[estado.tallaSeleccionada];
+            } else {
+                factor = p.factorCm2.default || 0;
+            }
+        }
+        
+        let cargoDisenos = 0;
+        $('.item-cargado').each(function() {
+            const anchoCm = parseFloat($(this).find('.detalle-ancho').text()) || 0;
+            const altoCm = parseFloat($(this).find('.detalle-alto').text()) || 0;
+            const area = anchoCm * altoCm;
+            cargoDisenos += area * factor;
+        });
+        const total = (base + cargoDisenos) * cant;
+
+        seleccionarElemento(null);
+        $("#areaDeEstampado").css('border', 'none');
+
+        const elementoParaCapturar = document.getElementById('capture');
+        
+        if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+            alert("Error: Librerías de generación de PDF no cargadas. Recarga la página.");
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        const vistaOriginal = estado.vistaActual;
+
+        const esperarImagenes = (contenedor) => {
+            const imagenes = contenedor.getElementsByTagName('img');
+            const promesas = Array.from(imagenes).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+            });
+            return Promise.all(promesas);
+        };
+
+        try {
+            $("#btnVistaFrente").click();
+            await esperarImagenes(elementoParaCapturar);
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const canvasFrente = await html2canvas(elementoParaCapturar, { 
+                allowTaint: false,
+                useCORS: true,
+                backgroundColor: null,
+                logging: false,
+                scale: 1
+            });
+            const imgDataFrente = canvasFrente.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgDataFrente);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgDataFrente, 'PNG', 0, 10, pdfWidth, pdfHeight);
+
+            if ($("#diseñosEspalda").children().length > 0) {
+                $("#btnVistaEspalda").click();
+                await esperarImagenes(elementoParaCapturar);
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const canvasEspalda = await html2canvas(elementoParaCapturar, { 
+                    allowTaint: false,
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false,
+                    scale: 1
+                });
+                pdf.addPage();
+                const imgDataEspalda = canvasEspalda.toDataURL('image/png');
+                const imgPropsEspalda = pdf.getImageProperties(imgDataEspalda);
+                const pdfHeightEspalda = (imgPropsEspalda.height * pdfWidth) / imgPropsEspalda.width;
+                pdf.addImage(imgDataEspalda, 'PNG', 0, 10, pdfWidth, pdfHeightEspalda);
+            }
+
+            pdf.save('diseño-producto.pdf');
+            
+            if (vistaOriginal === 'frente') {
+                $("#btnVistaFrente").click();
+            } else {
+                $("#btnVistaEspalda").click();
+            }
+            $("#areaDeEstampado").css('border', '2px dashed #999');
+
+            let mensaje = `Agregando ${cant} ${p.nombre}`;
+            if (estado.tallaSeleccionada) mensaje += `\nTalla: ${estado.tallaSeleccionada}`;
+            mensaje += `\nTotal: $${Math.round(total).toLocaleString()}`;
+            alert(mensaje);
+
+        } catch (error) {
+            console.error("Error al generar PDF:", error);
+            if (window.location.protocol === 'file:') {
+                alert("El producto fue agregado, pero el navegador bloqueó la creación del PDF por seguridad (porque estás abriendo el archivo localmente con file://). Súbelo a un servidor web para que funcione el PDF.");
+            } else {
+                alert("Hubo un error al generar el PDF. Revisa la consola (F12) para más detalles.");
+            }
+            if (vistaOriginal === 'frente') $("#btnVistaFrente").click();
+            else $("#btnVistaEspalda").click();
+            $("#areaDeEstampado").css('border', '2px dashed #999');
+            
+            let mensaje = `Agregando ${cant} ${p.nombre}`;
+            if (estado.tallaSeleccionada) mensaje += `\nTalla: ${estado.tallaSeleccionada}`;
+            mensaje += `\nTotal: $${Math.round(total).toLocaleString()}`;
+            alert(mensaje);
+        }
+    });
+
+    $(".btn-cerrar-modal,.modal-overlay").on("click", function(e) { if (e.target === this) $(this).closest(".modal-overlay").addClass("hidden"); });
+    $("#grilla-catalogo-imagenes").on("click", ".catalogo-item", function() { agregarElemento("imagen", { src: $(this).attr("src") }); $("#modal-catalogo-overlay").addClass("hidden"); });
+    
+    $('.btn-vista').on('click', function() {
+        const vista = $(this).data('vista');
+        $('.btn-vista').removeClass('active');
+        $(this).addClass('active');
+        estado.vistaActual = vista;
+        seleccionarElemento(null);
+        actualizarVisor();
+        actualizarVisibilidadDiseños();
+        guardarEstado();
+    });
+
+    $('.columna-opciones').on("click", ".itemSuperficiesIcono", function() {
+        $(".itemSuperficiesIcono").removeClass("selected");
+        $(this).addClass("selected");
+        estado.productoId = $(this).data("idsuperficie");
+        actualizarVisor();
+        actualizarPrecio();
+        actualizarTallas();
+        reescalarDisenosAlNuevoProducto();
+        actualizarMedidasDeTodosLosElementos();
+        revalidarLimitesDisenos();
+        guardarEstado();
+    });
+
+    $('.columna-opciones').on("click", ".itemColores", function() {
+        if ($(this).hasClass("disabled")) return;
+        estado.colorNombre = $(this).data("color");
+        actualizarVisor();
+        guardarEstado();
+    });
+
+    $('.columna-opciones').on('click', '.itemTalla', function() {
+        const nuevaTalla = $(this).text();
+        if (estado.tallaSeleccionada === nuevaTalla) return;
+
+        $('.itemTalla').removeClass('selected');
+        $(this).addClass('selected');
+        estado.tallaSeleccionada = nuevaTalla;
+
+        const productoActual = productos[estado.productoId];
+        if (productoActual.anchoRealCm && productoActual.anchoRealCm[estado.tallaSeleccionada]) {
+            anchoRealActualCm = productoActual.anchoRealCm[estado.tallaSeleccionada];
+        } else {
+            anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
+        }
+        if (productoActual.altoRealCm && productoActual.altoRealCm[estado.tallaSeleccionada]) {
+            altoRealActualCm = productoActual.altoRealCm[estado.tallaSeleccionada];
+        } else {
+            altoRealActualCm = productoActual.altoRealCm?.default || 37;
+        }
+
+        reescalarDisenosPorTalla();
+    });
+
+    $('#listaElementosCargados').on("click", ".item-cargado", function() {
+        const targetId = $(this).data("target-id");
+        seleccionarElemento($("#" + targetId));
+    });
+
+    $('#listaElementosCargados').on("click", ".btn-eliminar-item, .btn-eliminar-detalle", function(e) {
+        e.stopPropagation();
+        const $item = $(this).closest(".item-cargado");
+        const targetId = $item.data("target-id");
+        $("#" + targetId).remove();
+        $item.remove();
+        seleccionarElemento(null);
+        actualizarVisibilidadDiseños();
+        actualizarPrecio();
+        guardarEstado();
+    });
+
+    // ============================================
+    // MODAL DE GUÍA DE TALLAS
+    // ============================================
+    $(document).on('click', '.btn-guia-tallas', function() {
+        const producto = productos[estado.productoId];
+        if (!producto || !producto.tallas || producto.tallas.length === 0) return;
+        
+        $('#modal-tallas-producto').text(producto.nombre);
+        
+        let html = '<table class="tabla-tallas"><tr><th>Talla</th><th>Ancho (cm)</th><th>Alto (cm)</th></tr>';
+        producto.tallas.forEach(talla => {
+            const ancho = producto.anchoRealCm[talla] || producto.anchoRealCm.default || '-';
+            const alto = producto.altoRealCm[talla] || producto.altoRealCm.default || '-';
+            html += `<tr><td>${talla}</td><td>${ancho}</td><td>${alto}</td></tr>`;
+        });
+        html += '</table>';
+        
+        $('#tabla-tallas-contenido').html(html);
+        $('#modal-tallas-overlay').removeClass('hidden');
+    });
+
+    $('#modal-tallas-overlay').on('click', '.btn-cerrar-modal', function() {
+        $('#modal-tallas-overlay').addClass('hidden');
+    });
+    $('#modal-tallas-overlay').on('click', function(e) {
+        if (e.target === this) $(this).addClass('hidden');
+    });
+
+    // ============================================
+    // ACTUALIZAR CONTAINMENT AL REDIMENSIONAR (MÓVIL)
+    // ============================================
+    $(window).on('resize orientationchange', function() {
+        setTimeout(function() {
+            $('.elemento-personalizado').each(function() {
+                const $el = $(this);
+                if ($el.hasClass('ui-draggable')) {
+                    $el.draggable('option', 'containment', '#areaDeEstampado');
+                }
+                if ($el.hasClass('ui-resizable')) {
+                    $el.resizable('option', 'containment', '#areaDeEstampado');
+                }
+            });
+            actualizarMedidasDeTodosLosElementos();
+        }, 100);
+    });
+    </script>
+</body>
+</html>
