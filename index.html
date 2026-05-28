@@ -1103,18 +1103,34 @@
             }
         }
         
-        let cargoDisenos = 0;
+        let areaFrente = 0;
+        let areaEspalda = 0;
         let detalleDisenos = [];
         $('.item-cargado').each(function() {
             const $item = $(this);
             const anchoCm = parseFloat($item.find('.detalle-ancho').text()) || 0;
             const altoCm = parseFloat($item.find('.detalle-alto').text()) || 0;
+            const vista = $item.data('vista') || 'frente';
             const area = anchoCm * altoCm;
             
-            const cargoDiseno = area * factor;
-            cargoDisenos += cargoDiseno;
-            detalleDisenos.push(`<div>• Diseño: ${anchoCm.toFixed(1)}×${altoCm.toFixed(1)} cm = ${area.toFixed(0)} cm² → $${Math.round(cargoDiseno).toLocaleString()}</div>`);
+            if (vista === 'frente') areaFrente += area;
+            else areaEspalda += area;
+            
+            detalleDisenos.push(`<div>• Diseño ${vista === 'frente' ? 'Frente' : 'Espalda'}: ${anchoCm.toFixed(1)}×${altoCm.toFixed(1)} cm = ${area.toFixed(0)} cm²</div>`);
         });
+
+        function calcularTier(area) {
+            if (area <= 0) return 0;
+            if (area <= 600) return area * factor;
+            return (600 * factor) + ((area - 600) * 5.0);
+        }
+
+        const cargoFrente = calcularTier(areaFrente);
+        const cargoEspalda = calcularTier(areaEspalda);
+        const cargoDisenos = cargoFrente + cargoEspalda;
+
+        if (cargoFrente > 0) detalleDisenos.push(`<div><strong>Cargo Estampados Frente:</strong> $${Math.round(cargoFrente).toLocaleString()}</div>`);
+        if (cargoEspalda > 0) detalleDisenos.push(`<div><strong>Cargo Estampados Espalda:</strong> $${Math.round(cargoEspalda).toLocaleString()}</div>`);
         
         const subtotal = base + cargoDisenos;
         const total = subtotal * cant;
@@ -1123,7 +1139,6 @@
         $("#precioDesglose").html(`
             <div><strong>Precio base</strong> (talla ${estado.tallaSeleccionada || 'N/A'}): $${base.toLocaleString()}</div>
             ${detalleDisenos.join('')}
-            <div><strong>Cargo total diseños:</strong> $${Math.round(cargoDisenos).toLocaleString()}</div>
             <div><strong>Subtotal:</strong> $${Math.round(subtotal).toLocaleString()}</div>
             <div><strong>Cantidad:</strong> ${cant}</div>
             <div style="margin-top:4px; border-top:1px dashed #ccc; padding-top:4px;"><strong>Total:</strong> $${Math.round(total).toLocaleString()}</div>
@@ -1921,13 +1936,24 @@
             }
         }
         
-        let cargoDisenos = 0;
+        let areaFrente = 0;
+        let areaEspalda = 0;
         $('.item-cargado').each(function() {
             const anchoCm = parseFloat($(this).find('.detalle-ancho').text()) || 0;
             const altoCm = parseFloat($(this).find('.detalle-alto').text()) || 0;
+            const vista = $(this).data('vista') || 'frente';
             const area = anchoCm * altoCm;
-            cargoDisenos += area * factor;
+            if (vista === 'frente') areaFrente += area;
+            else areaEspalda += area;
         });
+
+        function calcularTier(area) {
+            if (area <= 0) return 0;
+            if (area <= 600) return area * factor;
+            return (600 * factor) + ((area - 600) * 5.0);
+        }
+        
+        const cargoDisenos = calcularTier(areaFrente) + calcularTier(areaEspalda);
         const total = (base + cargoDisenos) * cant;
 
         seleccionarElemento(null);
