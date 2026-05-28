@@ -1133,6 +1133,35 @@
     // ============================================
     // FUNCIONES DE MEDIDAS Y REESCALADO (sin cambios)
     // ============================================
+    function actualizarDimensionesRealesArea() {
+        const productoActual = productos[estado.productoId];
+        let anchoPrendaCm = productoActual.anchoRealCm?.default || 30;
+        let altoPrendaCm = productoActual.altoRealCm?.default || 37;
+        
+        if (estado.tallaSeleccionada && productoActual.anchoRealCm && productoActual.anchoRealCm[estado.tallaSeleccionada]) {
+            anchoPrendaCm = productoActual.anchoRealCm[estado.tallaSeleccionada];
+        }
+        if (estado.tallaSeleccionada && productoActual.altoRealCm && productoActual.altoRealCm[estado.tallaSeleccionada]) {
+            altoPrendaCm = productoActual.altoRealCm[estado.tallaSeleccionada];
+        }
+
+        const proporcionTorsoAncho = productoActual.proporcionTorso || 0.60;
+        const proporcionTorsoAlto = productoActual.proporcionTorsoAlto || 0.80;
+
+        const areaEstampado = estado.vistaActual === 'frente' 
+            ? productoActual.areaEstampadoFrente 
+            : (productoActual.areaEstampadoEspalda || productoActual.areaEstampadoFrente);
+
+        const pctAreaAncho = parseFloat(areaEstampado.width) / 100;
+        const pctAreaAlto = parseFloat(areaEstampado.height) / 100;
+
+        const proporcionAreaEnTorsoAncho = pctAreaAncho / proporcionTorsoAncho;
+        const proporcionAreaEnTorsoAlto = pctAreaAlto / proporcionTorsoAlto;
+
+        anchoRealActualCm = anchoPrendaCm * proporcionAreaEnTorsoAncho;
+        altoRealActualCm = altoPrendaCm * proporcionAreaEnTorsoAlto;
+    }
+
     function actualizarMedidasDeTodosLosElementos() {
         $('.item-cargado').each(function() {
             const $item = $(this);
@@ -1723,27 +1752,15 @@
             if (primeraTalla.length > 0) {
                 primeraTalla.addClass('selected');
                 estado.tallaSeleccionada = primeraTalla.text();
-                if (productoActual.anchoRealCm && productoActual.anchoRealCm[estado.tallaSeleccionada]) {
-                    anchoRealActualCm = productoActual.anchoRealCm[estado.tallaSeleccionada];
-                } else {
-                    anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
-                }
-                if (productoActual.altoRealCm && productoActual.altoRealCm[estado.tallaSeleccionada]) {
-                    altoRealActualCm = productoActual.altoRealCm[estado.tallaSeleccionada];
-                } else {
-                    altoRealActualCm = productoActual.altoRealCm?.default || 37;
-                }
             } else {
                 estado.tallaSeleccionada = null;
-                anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
-                altoRealActualCm = productoActual.altoRealCm?.default || 37;
             }
+            actualizarDimensionesRealesArea();
             $panelTallas.show();
         } else {
             $panelTallas.hide();
             estado.tallaSeleccionada = null;
-            anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
-            altoRealActualCm = productoActual.altoRealCm?.default || 37;
+            actualizarDimensionesRealesArea();
         }
         actualizarMedidasDeTodosLosElementos();
         actualizarPrecio();
@@ -2016,6 +2033,7 @@
         $('.btn-vista').removeClass('active');
         $(this).addClass('active');
         estado.vistaActual = vista;
+        actualizarDimensionesRealesArea();
         seleccionarElemento(null);
         actualizarVisor();
         actualizarVisibilidadDiseños();
@@ -2050,17 +2068,7 @@
         $(this).addClass('selected');
         estado.tallaSeleccionada = nuevaTalla;
 
-        const productoActual = productos[estado.productoId];
-        if (productoActual.anchoRealCm && productoActual.anchoRealCm[estado.tallaSeleccionada]) {
-            anchoRealActualCm = productoActual.anchoRealCm[estado.tallaSeleccionada];
-        } else {
-            anchoRealActualCm = productoActual.anchoRealCm?.default || 30;
-        }
-        if (productoActual.altoRealCm && productoActual.altoRealCm[estado.tallaSeleccionada]) {
-            altoRealActualCm = productoActual.altoRealCm[estado.tallaSeleccionada];
-        } else {
-            altoRealActualCm = productoActual.altoRealCm?.default || 37;
-        }
+        actualizarDimensionesRealesArea();
 
         reescalarDisenosPorTalla();
     });
