@@ -986,98 +986,11 @@
     // FUNCIONES DE PERSISTENCIA
     // ============================================
     function guardarEstado() {
-    try {
-        const diseños = [];
-        $('.elemento-personalizado').each(function() {
-            const $el = $(this);
-            const id = $el.attr('id');
-            const tipo = $el.hasClass('texto-personalizado') ? 'texto' : 'imagen';
-            let contenido = tipo === 'texto' ? $el.html().replace(/<div class="btn-borrar-canvas".*?<\/div>/g, '') : $el.find('img').attr('src');
-            
-            if (tipo === 'imagen' && contenido && contenido.startsWith('data:image') && contenido.length > 100000) {
-                contenido = '';
-                return;
-            }
-            
-            const estilo = {
-                width: $el.css('width'),
-                height: $el.css('height'),
-                left: $el.css('left'),
-                top: $el.css('top'),
-                fontFamily: $el.css('font-family'),
-                fontSize: $el.css('font-size'),
-                color: $el.css('color'),
-                textAlign: $el.css('text-align'),
-                fontWeight: $el.css('font-weight'),
-                fontStyle: $el.css('font-style'),
-                textDecoration: $el.css('text-decoration')
-            };
-            const dataVista = $el.data('vista');
-            diseños.push({
-                id: id,
-                tipo: tipo,
-                contenido: contenido,
-                estilo: estilo,
-                vista: dataVista
-            });
-        });
-        localStorage.setItem('sublimar_disenos', JSON.stringify(diseños));
-    } catch (e) {
-        console.warn('No se pudo guardar el estado en localStorage:', e);
+        // Deshabilitado a petición del usuario para que al recargar comience de cero
     }
-}
 
     function cargarEstado() {
-        const guardado = localStorage.getItem('sublimar_disenos');
-        if (!guardado) return;
-        const diseños = JSON.parse(guardado);
-        $('.elemento-personalizado').remove();
-        $('.item-cargado').remove();
-        contadorElementos = 0;
-        diseños.forEach(d => {
-            contadorElementos++;
-            const id = d.id || "elemento-" + contadorElementos;
-            const $contenedorDiseño = $(`#diseños${d.vista === 'frente' ? 'Frente' : 'Espalda'}`);
-            const $contenedorLista = $(`#lista${d.vista === 'frente' ? 'Frente' : 'Espalda'}`);
-            if (d.tipo === 'imagen') {
-                const $el = $(`<div id="${id}" class="elemento-personalizado" data-vista="${d.vista}" style="width: ${d.estilo.width}; height: ${d.estilo.height}; left: ${d.estilo.left}; top: ${d.estilo.top};"><img src="${d.contenido}"></div>`);
-                $contenedorDiseño.append($el);
-                const $item = $(`
-                    <div class="item-cargado" data-target-id="${id}" data-vista="${d.vista}">
-                        <div class="preview-img-container">
-                            <img src="${d.contenido}" class="preview-img">
-                        </div>
-                        <div class="detalle-estampado">
-                            <div class="detalle-linea"><strong>Tipo de estampado:</strong> DTF Textil</div>
-                            <div class="detalle-linea"><strong>Ancho:</strong> <span class="detalle-ancho">0</span> cm (aprox)</div>
-                            <div class="detalle-linea"><strong>Alto:</strong> <span class="detalle-alto">0</span> cm (aprox)</div>
-                            <button class="btn-eliminar-detalle">Eliminar</button>
-                        </div>
-                    </div>`);
-                $contenedorLista.append($item);
-                hacerInteractivo($el);
-            } else {
-                const $el = $(`<div id="${id}" class="elemento-personalizado texto-personalizado" data-vista="${d.vista}" style='${Object.entries(d.estilo).map(([k,v]) => k+":"+v).join(";")}'>${d.contenido}</div>`);
-                $contenedorDiseño.append($el);
-                const $item = $(`
-                    <div class="item-cargado" data-target-id="${id}" data-vista="${d.vista}">
-                        <div class="preview-img-container">
-                            <span style="font-size: 32px; padding: 5px; display: block; text-align: center;">T</span>
-                        </div>
-                        <div class="detalle-estampado">
-                            <div class="detalle-linea"><strong>Tipo de estampado:</strong> DTF Textil</div>
-                            <div class="detalle-linea"><strong>Ancho:</strong> <span class="detalle-ancho">0</span> cm (aprox)</div>
-                            <div class="detalle-linea"><strong>Alto:</strong> <span class="detalle-alto">0</span> cm (aprox)</div>
-                            <button class="btn-eliminar-detalle">Eliminar</button>
-                        </div>
-                    </div>`);
-                $contenedorLista.append($item);
-                hacerInteractivo($el);
-            }
-        });
-        actualizarMedidasDeTodosLosElementos();
-        actualizarPrecio();
-        actualizarVisibilidadDisenos();
+        // Deshabilitado a petición del usuario para que al recargar comience de cero
     }
 
     // ============================================
