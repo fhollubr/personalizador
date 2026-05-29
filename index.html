@@ -266,8 +266,8 @@
 
     <div class="personalizador-app">
 
-        <div class="columna-visor">
-            <div class="visor-prenda" id="capture">
+        <div class="columna-visor" id="capture">
+            <div class="visor-prenda">
                 <img id="imagenSuperficie" src="imagenes/polera-cuello-redondo/polera-polo-cuello-redondo-blanco.png" alt="Prenda seleccionada">
                 <div id="areaDeEstampado">
                     <div id="diseñosFrente"></div>
@@ -1324,24 +1324,70 @@
     // BOTÓN WHATSAPP (sin cambios)
     // ============================================
     async function compartirWhatsApp() {
-        const elementoCapturar = document.getElementById('capture');
-        if (!elementoCapturar) return;
+        const elementoParaCapturar = document.getElementById('capture');
+        if (!elementoParaCapturar) return;
         
         const $areaEstampado = $('#areaDeEstampado');
         const bordeOriginal = $areaEstampado.css('border');
         $areaEstampado.css('border', 'none');
+        seleccionarElemento(null);
+        
+        if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+            alert("Error: Librerías de generación de PDF no cargadas. Recarga la página.");
+            return;
+        }
         
         try {
-            const canvas = await html2canvas(elementoCapturar, { 
-                allowTaint: false,
-                useCORS: true,
-                backgroundColor: null,
-                scale: 1,
-                logging: false
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const vistaOriginal = estado.vistaActual;
+
+            const esperarImagenes = (contenedor) => {
+                const imagenes = contenedor.getElementsByTagName('img');
+                const promesas = Array.from(imagenes).map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                });
+                return Promise.all(promesas);
+            };
+
+            $("#btnVistaFrente").click();
+            await esperarImagenes(elementoParaCapturar);
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const canvasFrente = await html2canvas(elementoParaCapturar, { 
+                allowTaint: false, useCORS: true, backgroundColor: null, scale: 1, logging: false
             });
-            
+            const imgDataFrente = canvasFrente.toDataURL('image/png');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const imgPropsFrente = pdf.getImageProperties(imgDataFrente);
+            const pdfHeightFrente = (imgPropsFrente.height * pdfWidth) / imgPropsFrente.width;
+            pdf.addImage(imgDataFrente, 'PNG', 0, 10, pdfWidth, pdfHeightFrente);
+
+            if ($("#diseñosEspalda").children().length > 0) {
+                $("#btnVistaEspalda").click();
+                await esperarImagenes(elementoParaCapturar);
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const canvasEspalda = await html2canvas(elementoParaCapturar, { 
+                    allowTaint: false, useCORS: true, backgroundColor: null, scale: 1, logging: false
+                });
+                pdf.addPage();
+                const imgDataEspalda = canvasEspalda.toDataURL('image/png');
+                const imgPropsEspalda = pdf.getImageProperties(imgDataEspalda);
+                const pdfHeightEspalda = (imgPropsEspalda.height * pdfWidth) / imgPropsEspalda.width;
+                pdf.addImage(imgDataEspalda, 'PNG', 0, 10, pdfWidth, pdfHeightEspalda);
+            }
+
+            if (vistaOriginal === 'frente') $("#btnVistaFrente").click();
+            else $("#btnVistaEspalda").click();
+
             $areaEstampado.css('border', bordeOriginal);
             
+            // Collect info for text message
             let diseñosInfo = [];
             let precioTotal = $(".precio-valor").text();
             let cantidad = $("#txtCantidad").val();
@@ -1355,49 +1401,50 @@
             });
             
             let mensajeTexto = `Hola, quiero consultar por este diseño:%0A%0A`;
-            mensajeTexto += `▪️ Producto: ${producto.nombre}%0A`;
-            mensajeTexto += `▪️ Talla: ${talla}%0A`;
-            mensajeTexto += `▪️ Cantidad: ${cantidad}%0A`;
+            mensajeTexto += `👕 Producto: ${producto.nombre}%0A`;
+            mensajeTexto += `📏 Talla: ${talla}%0A`;
+            mensajeTexto += `📦 Cantidad: ${cantidad}%0A`;
             if (diseñosInfo.length > 0) {
-                mensajeTexto += `▪️ Estampados:%0A`;
+                mensajeTexto += `🎨 Estampados:%0A`;
                 diseñosInfo.forEach(info => mensajeTexto += `   ${info}%0A`);
             }
-            mensajeTexto += `▪️ Precio total: ${precioTotal}%0A%0A`;
-            mensajeTexto += `(Adjunto la imagen del diseño)`;
+            mensajeTexto += `💰 Precio total: ${precioTotal}%0A%0A`;
+            mensajeTexto += `(Adjunto el PDF con el diseño de mi prenda)`;
 
-            canvas.toBlob(async (blob) => {
-                if (navigator.share && blob) {
-                    const file = new File([blob], 'mi-diseno.png', { type: 'image/png' });
-                    try {
-                        await navigator.share({
-                            title: 'Mi diseño personalizado',
-                            text: mensajeTexto.replace(/%0A/g, '\n'),
-                            files: [file]
-                        });
-                        return;
-                    } catch (shareError) {
-                        console.log('Error al compartir, usando método alternativo', shareError);
-                    }
+            const blob = pdf.output('blob');
+            const nombreArchivo = producto.nombre.replace(/\s+/g, '-') + '-WSP.pdf';
+
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], nombreArchivo, { type: 'application/pdf' })] })) {
+                const file = new File([blob], nombreArchivo, { type: 'application/pdf' });
+                try {
+                    await navigator.share({
+                        title: 'Mi diseño personalizado',
+                        text: mensajeTexto.replace(/%0A/g, '\n'),
+                        files: [file]
+                    });
+                    return;
+                } catch (shareError) {
+                    console.log('Error al compartir, usando método alternativo', shareError);
                 }
-                
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = 'mi-diseno.png';
-                link.href = url;
-                link.click();
-                setTimeout(() => URL.revokeObjectURL(url), 100);
-                
-                const whatsappUrl = `https://wa.me/?text=${mensajeTexto}`;
-                window.open(whatsappUrl, '_blank');
-            }, 'image/png');
+            }
+            
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = nombreArchivo;
+            link.href = url;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            const whatsappUrl = `https://wa.me/?text=${mensajeTexto}`;
+            window.open(whatsappUrl, '_blank');
             
         } catch (error) {
             $areaEstampado.css('border', bordeOriginal);
-            console.error("Error al generar imagen para WhatsApp:", error);
+            console.error("Error al generar PDF para WhatsApp:", error);
             if (window.location.protocol === 'file:') {
                 alert("Seguridad del navegador: Para generar imágenes o enviar por WhatsApp, debes abrir esta página desde un servidor web (Vercel, Supabase, o Live Server local). Abriendo el archivo directo (file://) no se permite exportar imágenes.");
             } else {
-                alert("No se pudo generar la imagen. Intenta de nuevo.");
+                alert("No se pudo generar el documento. Intenta de nuevo.");
             }
         }
     }
