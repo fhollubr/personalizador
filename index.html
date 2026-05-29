@@ -96,6 +96,9 @@
         .itemSuperficiesIcono.selected{border-color:#e65100;background:#424242}
         .listaColores{display:flex;gap:12px;flex-wrap:wrap;list-style:none}
         .itemColores{width:28px;height:28px;border-radius:50%;border:2px solid #ccc;cursor:pointer}
+        .ui-resizable-se{bottom:-5px;right:-5px;width:15px;height:15px;background:#007bff;border-radius:50%;border:2px solid #fff;cursor:se-resize!important;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+        .btn-borrar-canvas{position:absolute;top:-10px;right:-10px;width:24px;height:24px;background:#dc3545;color:white;border-radius:50%;text-align:center;line-height:22px;cursor:pointer;font-weight:bold;font-size:14px;box-shadow:0 1px 3px rgba(0,0,0,0.3);z-index:100;display:none;}
+        .elemento-personalizado.seleccionado .btn-borrar-canvas{display:block;}
         .itemColores.selected{border-color:#e65100;transform:scale(1.15)}
         .itemColores.disabled{opacity:.3;cursor:not-allowed}
         .lista-tallas{display:flex;gap:10px;flex-wrap:wrap}
@@ -990,14 +993,11 @@
             const $el = $(this);
             const id = $el.attr('id');
             const tipo = $el.hasClass('texto-personalizado') ? 'texto' : 'imagen';
-            let contenido = tipo === 'texto' ? $el.html() : $el.find('img').attr('src');
+            let contenido = tipo === 'texto' ? $el.html().replace(/<div class="btn-borrar-canvas".*?<\/div>/g, '') : $el.find('img').attr('src');
             
-            // Si es una imagen en base64 muy grande, no la guardamos (opcional)
             if (tipo === 'imagen' && contenido && contenido.startsWith('data:image') && contenido.length > 100000) {
-                // No guardamos la imagen, pero podemos guardar un placeholder
-                contenido = ''; // o no guardar este diseño
-                // También podrías omitir este diseño del array
-                return; // sale del each, no lo añade
+                contenido = '';
+                return;
             }
             
             const estilo = {
@@ -1025,7 +1025,6 @@
         localStorage.setItem('sublimar_disenos', JSON.stringify(diseños));
     } catch (e) {
         console.warn('No se pudo guardar el estado en localStorage:', e);
-        // Puedes mostrar un mensaje no intrusivo al usuario si quieres
     }
 }
 
@@ -1334,6 +1333,7 @@
         const $areaEstampado = $('#areaDeEstampado');
         const bordeOriginal = $areaEstampado.css('border');
         $areaEstampado.css('border', 'none');
+        $('.btn-borrar-canvas').hide();
         seleccionarElemento(null);
         
         if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
@@ -1390,6 +1390,7 @@
             else $("#btnVistaEspalda").click();
 
             $areaEstampado.css('border', bordeOriginal);
+            $('.btn-borrar-canvas').show();
             
             // Collect info for text message
             let diseñosInfo = [];
@@ -1444,6 +1445,7 @@
             
         } catch (error) {
             $areaEstampado.css('border', bordeOriginal);
+            $('.btn-borrar-canvas').show();
             console.error("Error al generar PDF para WhatsApp:", error);
             if (window.location.protocol === 'file:') {
                 alert("Seguridad del navegador: Para generar imágenes o enviar por WhatsApp, debes abrir esta página desde un servidor web (Vercel, Supabase, o Live Server local). Abriendo el archivo directo (file://) no se permite exportar imágenes.");
@@ -1454,18 +1456,20 @@
     }
 
     // ============================================
-    // HACER INTERACTIVO (sin cambios)
+    // HACER INTERACTIVO (con botón borrar)
     // ============================================
     function hacerInteractivo($e) {
     const esImagen = $e.find('img').length > 0;
     
-    // Eliminar eventos previos para evitar duplicados
+    if($e.find('.btn-borrar-canvas').length === 0) {
+        $e.append('<div class="btn-borrar-canvas" title="Eliminar">×</div>');
+    }
+    
     $e.off("mousedown").on("mousedown", e => { 
         e.stopPropagation(); 
         seleccionarElemento($e); 
     });
     
-    // Destruir draggable previo si existe y volver a crearlo
     if ($e.hasClass('ui-draggable')) {
         $e.draggable('destroy');
     }
@@ -1474,13 +1478,11 @@
         stop: guardarEstado
     });
     
-    // Destruir resizable previo si existe
     if ($e.hasClass('ui-resizable')) {
         $e.resizable('destroy');
     }
     
     const opcionesResize = {
-        // Remover containment en el resize evita que jQuery UI deforme la imagen al chocar con el borde
         resize: function(event, ui) {
             const areaAnchoPx = $areaDeEstampado.width();
             const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
@@ -1488,7 +1490,6 @@
             let anchoCm = ui.size.width / pixelesPorCm;
             let altoCm = ui.size.height / pixelesPorCm;
             
-            // Limitar a MAX_CM si es necesario
             if (anchoCm > MAX_CM) {
                 const factor = MAX_CM / anchoCm;
                 ui.size.width = ui.size.width * factor;
@@ -1506,14 +1507,10 @@
             $itemEnLista.find('.detalle-alto').text(altoCmFixed);
             actualizarPrecio();
             
-            // ✅ NO MODIFICAR MANUALMENTE EL TAMAÑO (jQuery UI ya lo aplica)
-            
-            // Actualizar el containment del draggable durante el resize
             $(this).draggable('option', 'containment', '#areaDeEstampado');
         },
         stop: function(event, ui) {
             guardarEstado();
-            // Re-crear draggable para asegurar que funcione después del resize
             $(this).draggable('destroy');
             $(this).draggable({
                 containment: "#areaDeEstampado",
@@ -1525,7 +1522,7 @@
     if (esImagen) {
         opcionesResize.aspectRatio = true;
     } else {
-        opcionesResize.aspectRatio = true; // Forzar proporción también en textos para que no se deformen
+        opcionesResize.aspectRatio = true;
     }
     
     $e.resizable(opcionesResize);
@@ -1681,7 +1678,7 @@
         const $editorPanel = $('#panelEditorTexto');
         $editorPanel.off();
         
-        const contenidoActual = $el.clone().find('.ui-resizable-handle').remove().end().html().replace(/<br\s*\/?>/gi, "\n");
+        const contenidoActual = $el.clone().find('.ui-resizable-handle, .btn-borrar-canvas').remove().end().html().replace(/<br\s*\/?>/gi, "\n");
         const fuenteActual = $el.css('font-family').replace(/["']/g, '').split(',')[0];
         const colorActual = $el.css('color');
         const tamanoActual = parseInt($el.css('font-size'));
@@ -1728,7 +1725,12 @@
         function actualizarTextoEnDiseño() {
             const contenido = $('#editor-contenido').val().replace(/\n/g, '<br>');
             const nombreFuente = $('#editor-fuente').val();
+            
+            // Conservar botón borrar
+            const $btnBorrar = $el.find('.btn-borrar-canvas');
             $el.html(contenido);
+            $el.append($btnBorrar);
+            
             $el.css({
                 'font-family': `'${nombreFuente}'`,
                 'color': $('#editor-color').val(),
@@ -1967,6 +1969,22 @@
     $("#btnMas").on("click", () => { $("#txtCantidad").val(+$("#txtCantidad").val() + 1); actualizarPrecio(); guardarEstado(); });
     $("#btnMenos").on("click", () => { const a = +$("#txtCantidad").val(); if (a > 1) $("#txtCantidad").val(a - 1); actualizarPrecio(); guardarEstado(); });
     
+    // Delegación de eventos para el botón de borrar
+    $(document).on('click', '.btn-borrar-canvas', function(e) {
+        e.stopPropagation();
+        const $el = $(this).closest('.elemento-personalizado');
+        const targetId = $el.attr('id');
+        const $item = $(`.item-cargado[data-target-id="${targetId}"]`);
+        
+        $el.remove();
+        if ($item.length) $item.remove();
+        
+        seleccionarElemento(null);
+        actualizarVisibilidadDisenos();
+        actualizarPrecio();
+        guardarEstado();
+    });
+
     $("#btnAgregarAlCarrito").on("click", async function() {
         const p = productos[estado.productoId];
         const cant = +$("#txtCantidad").val();
@@ -2011,6 +2029,7 @@
 
         seleccionarElemento(null);
         $("#areaDeEstampado").css('border', 'none');
+        $('.btn-borrar-canvas').hide();
 
         const elementoParaCapturar = document.getElementById('capture');
         
@@ -2079,6 +2098,7 @@
                 $("#btnVistaEspalda").click();
             }
             $("#areaDeEstampado").css('border', '2px dashed #999');
+            $('.btn-borrar-canvas').show();
 
             let mensaje = `Agregando ${cant} ${p.nombre}`;
             if (estado.tallaSeleccionada) mensaje += `\nTalla: ${estado.tallaSeleccionada}`;
@@ -2095,6 +2115,7 @@
             if (vistaOriginal === 'frente') $("#btnVistaFrente").click();
             else $("#btnVistaEspalda").click();
             $("#areaDeEstampado").css('border', '2px dashed #999');
+            $('.btn-borrar-canvas').show();
             
             let mensaje = `Agregando ${cant} ${p.nombre}`;
             if (estado.tallaSeleccionada) mensaje += `\nTalla: ${estado.tallaSeleccionada}`;
@@ -2168,7 +2189,7 @@
         guardarEstado();
     });
 
-    document.addEventListener('keydown', function(e) {
+    $('body').on('keyup', function(e) {
         if (e.key === 'Delete' || e.key === 'Backspace' || e.keyCode === 46 || e.keyCode === 8) {
             const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
             if (tag === 'input' || tag === 'textarea') {
@@ -2188,7 +2209,7 @@
                 guardarEstado();
             }
         }
-    }, true);
+    });
 
     // ============================================
     // MODAL DE GUÍA DE TALLAS
