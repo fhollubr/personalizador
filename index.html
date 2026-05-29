@@ -2162,6 +2162,26 @@
         guardarEstado();
     });
 
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            if ($(e.target).is('input, textarea')) {
+                return;
+            }
+            if (elementoSeleccionado) {
+                const targetId = elementoSeleccionado.attr('id');
+                const $item = $(`.item-cargado[data-target-id="${targetId}"]`);
+                
+                $("#" + targetId).remove();
+                if ($item.length) $item.remove();
+                
+                seleccionarElemento(null);
+                actualizarVisibilidadDiseños();
+                actualizarPrecio();
+                guardarEstado();
+            }
+        }
+    });
+
     // ============================================
     // MODAL DE GUÍA DE TALLAS
     // ============================================
