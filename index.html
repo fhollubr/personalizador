@@ -20,8 +20,8 @@
                  url('fonts/NBACELTI.TTF') format('truetype');
         }
         @font-face {
-            font-family: 'Adidas WC 2026';
-            src: url('fonts/Adidas_WC_2026_fan_inspired_font.ttf') format('truetype');
+            font-family: 'Adidas2026';
+            src: url('fonts/Adidas_WC_2026_fan_inspired_font.ttf');
         }
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f0f2f5;color:#333}
@@ -967,7 +967,7 @@
         "imagenes/catalogo/27.png","imagenes/catalogo/28.png","imagenes/catalogo/33.png","imagenes/catalogo/30.png",
         "imagenes/catalogo/31.png","imagenes/catalogo/32.png","imagenes/catalogo/34.png"
     ];
-    const fuentes = ["Adidas WC 2026","Celtics","Arial","Abril Fatface","Alfa Slab One","Audiowide","Black Han Sans","Black Ops One","Codystar","Creepster","Ewert","Faster One","Fjalla One","Fredericka the Great","Fredoka One","Galindo","Gugi","Italianno","Krona One","Libre Barcode 128 Text","Lobster","Monoton","Nosifer","Notable","Oi","Pacifico","Permanent Marker","Press Start 2P","Questrial","Righteous","Rubik Beastly","Rye","Sacramento","Staatliches","Tourney","Trade Winds","Vast Shadow","Zilla Slab Highlight","VT323"];
+    const fuentes = ["Adidas2026","Celtics","Arial","Abril Fatface","Alfa Slab One","Audiowide","Black Han Sans","Black Ops One","Codystar","Creepster","Ewert","Faster One","Fjalla One","Fredericka the Great","Fredoka One","Galindo","Gugi","Italianno","Krona One","Libre Barcode 128 Text","Lobster","Monoton","Nosifer","Notable","Oi","Pacifico","Permanent Marker","Press Start 2P","Questrial","Righteous","Rubik Beastly","Rye","Sacramento","Staatliches","Tourney","Trade Winds","Vast Shadow","Zilla Slab Highlight","VT323"];
     
     let contadorElementos = 0;
     const $areaDeEstampado = $("#areaDeEstampado");
@@ -2170,7 +2170,7 @@
 
     window.addEventListener('keydown', function(e) {
         if (e.key === 'Delete' || e.key === 'Backspace' || e.keyCode === 46 || e.keyCode === 8) {
-            const tag = e.target.tagName.toLowerCase();
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
             if (tag === 'input' || tag === 'textarea') {
                 return;
             }
