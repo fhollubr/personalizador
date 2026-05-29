@@ -1079,7 +1079,7 @@
         });
         actualizarMedidasDeTodosLosElementos();
         actualizarPrecio();
-        actualizarVisibilidadDiseños();
+        actualizarVisibilidadDisenos();
     }
 
     // ============================================
@@ -1834,7 +1834,7 @@
         actualizarPrecio();
     }
 
-    function actualizarVisibilidadDiseños() {
+    function actualizarVisibilidadDisenos() {
         const vista = estado.vistaActual;
         const vistaOpuesta = vista === 'frente' ? 'espalda' : 'frente';
         const capitalizar = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1906,7 +1906,7 @@
     // ============================================
     $(document).ready(function() {
         cargarEstado();
-        actualizarVisibilidadDiseños();
+        actualizarVisibilidadDisenos();
         actualizarVisor();
         actualizarPrecio();
         actualizarTallas();
@@ -2114,7 +2114,7 @@
         actualizarDimensionesRealesArea();
         seleccionarElemento(null);
         actualizarVisor();
-        actualizarVisibilidadDiseños();
+        actualizarVisibilidadDisenos();
         guardarEstado();
     });
 
@@ -2163,12 +2163,12 @@
         $("#" + targetId).remove();
         $item.remove();
         seleccionarElemento(null);
-        actualizarVisibilidadDiseños();
+        actualizarVisibilidadDisenos();
         actualizarPrecio();
         guardarEstado();
     });
 
-    window.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function(e) {
         if (e.key === 'Delete' || e.key === 'Backspace' || e.keyCode === 46 || e.keyCode === 8) {
             const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
             if (tag === 'input' || tag === 'textarea') {
@@ -2183,12 +2183,12 @@
                 if ($item.length) $item.remove();
                 
                 seleccionarElemento(null);
-                actualizarVisibilidadDiseños();
+                actualizarVisibilidadDisenos();
                 actualizarPrecio();
                 guardarEstado();
             }
         }
-    });
+    }, true);
 
     // ============================================
     // MODAL DE GUÍA DE TALLAS
