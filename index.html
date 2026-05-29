@@ -1342,7 +1342,7 @@
         
         try {
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
+            let pdf = null;
             const vistaOriginal = estado.vistaActual;
 
             const esperarImagenes = (contenedor) => {
@@ -1365,10 +1365,12 @@
                 allowTaint: false, useCORS: true, backgroundColor: null, scale: 1, logging: false
             });
             const imgDataFrente = canvasFrente.toDataURL('image/png');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const imgPropsFrente = pdf.getImageProperties(imgDataFrente);
-            const pdfHeightFrente = (imgPropsFrente.height * pdfWidth) / imgPropsFrente.width;
-            pdf.addImage(imgDataFrente, 'PNG', 0, 10, pdfWidth, pdfHeightFrente);
+            const imgWidthFrente = canvasFrente.width;
+            const imgHeightFrente = canvasFrente.height;
+            const orientationFrente = imgWidthFrente > imgHeightFrente ? 'l' : 'p';
+            
+            pdf = new jsPDF({ orientation: orientationFrente, unit: 'px', format: [imgWidthFrente, imgHeightFrente] });
+            pdf.addImage(imgDataFrente, 'PNG', 0, 0, imgWidthFrente, imgHeightFrente);
 
             if ($("#diseñosEspalda").children().length > 0) {
                 $("#btnVistaEspalda").click();
@@ -1378,11 +1380,13 @@
                 const canvasEspalda = await html2canvas(elementoParaCapturar, { 
                     allowTaint: false, useCORS: true, backgroundColor: null, scale: 1, logging: false
                 });
-                pdf.addPage();
                 const imgDataEspalda = canvasEspalda.toDataURL('image/png');
-                const imgPropsEspalda = pdf.getImageProperties(imgDataEspalda);
-                const pdfHeightEspalda = (imgPropsEspalda.height * pdfWidth) / imgPropsEspalda.width;
-                pdf.addImage(imgDataEspalda, 'PNG', 0, 10, pdfWidth, pdfHeightEspalda);
+                const imgWidthEspalda = canvasEspalda.width;
+                const imgHeightEspalda = canvasEspalda.height;
+                const orientationEspalda = imgWidthEspalda > imgHeightEspalda ? 'l' : 'p';
+                
+                pdf.addPage([imgWidthEspalda, imgHeightEspalda], orientationEspalda);
+                pdf.addImage(imgDataEspalda, 'PNG', 0, 0, imgWidthEspalda, imgHeightEspalda);
             }
 
             if (vistaOriginal === 'frente') $("#btnVistaFrente").click();
@@ -2038,7 +2042,7 @@
             return;
         }
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
+        let pdf = null;
         const vistaOriginal = estado.vistaActual;
 
         const esperarImagenes = (contenedor) => {
@@ -2066,10 +2070,12 @@
                 scale: 1
             });
             const imgDataFrente = canvasFrente.toDataURL('image/png');
-            const imgProps = pdf.getImageProperties(imgDataFrente);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            pdf.addImage(imgDataFrente, 'PNG', 0, 10, pdfWidth, pdfHeight);
+            const imgWidthFrente = canvasFrente.width;
+            const imgHeightFrente = canvasFrente.height;
+            const orientationFrente = imgWidthFrente > imgHeightFrente ? 'l' : 'p';
+            
+            pdf = new jsPDF({ orientation: orientationFrente, unit: 'px', format: [imgWidthFrente, imgHeightFrente] });
+            pdf.addImage(imgDataFrente, 'PNG', 0, 0, imgWidthFrente, imgHeightFrente);
 
             if ($("#diseñosEspalda").children().length > 0) {
                 $("#btnVistaEspalda").click();
@@ -2083,11 +2089,13 @@
                     logging: false,
                     scale: 1
                 });
-                pdf.addPage();
                 const imgDataEspalda = canvasEspalda.toDataURL('image/png');
-                const imgPropsEspalda = pdf.getImageProperties(imgDataEspalda);
-                const pdfHeightEspalda = (imgPropsEspalda.height * pdfWidth) / imgPropsEspalda.width;
-                pdf.addImage(imgDataEspalda, 'PNG', 0, 10, pdfWidth, pdfHeightEspalda);
+                const imgWidthEspalda = canvasEspalda.width;
+                const imgHeightEspalda = canvasEspalda.height;
+                const orientationEspalda = imgWidthEspalda > imgHeightEspalda ? 'l' : 'p';
+                
+                pdf.addPage([imgWidthEspalda, imgHeightEspalda], orientationEspalda);
+                pdf.addImage(imgDataEspalda, 'PNG', 0, 0, imgWidthEspalda, imgHeightEspalda);
             }
 
             pdf.save(p.nombre.replace(/\s+/g, '-') + '.pdf');
