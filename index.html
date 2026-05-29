@@ -1476,7 +1476,7 @@
     }
     
     const opcionesResize = {
-        containment: "#areaDeEstampado",
+        // Remover containment en el resize evita que jQuery UI deforme la imagen al chocar con el borde
         resize: function(event, ui) {
             const areaAnchoPx = $areaDeEstampado.width();
             const pixelesPorCm = areaAnchoPx / anchoRealActualCm;
@@ -1520,6 +1520,8 @@
     
     if (esImagen) {
         opcionesResize.aspectRatio = true;
+    } else {
+        opcionesResize.aspectRatio = true; // Forzar proporción también en textos para que no se deformen
     }
     
     $e.resizable(opcionesResize);
