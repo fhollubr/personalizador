@@ -2168,12 +2168,14 @@
         guardarEstado();
     });
 
-    $(document).on('keydown', function(e) {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-            if ($(e.target).is('input, textarea')) {
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Delete' || e.key === 'Backspace' || e.keyCode === 46 || e.keyCode === 8) {
+            const tag = e.target.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea') {
                 return;
             }
-            if (elementoSeleccionado) {
+            if (elementoSeleccionado && elementoSeleccionado.length > 0) {
+                e.preventDefault();
                 const targetId = elementoSeleccionado.attr('id');
                 const $item = $(`.item-cargado[data-target-id="${targetId}"]`);
                 
